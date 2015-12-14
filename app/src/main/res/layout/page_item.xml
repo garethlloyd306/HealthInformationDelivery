@@ -26,7 +26,7 @@ android:layout_height="fill_parent">
         custom:donut_text_size="0dp"
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="79dp" />
+        android:layout_marginTop="40dp" />
 
     <ImageView
         android:id="@+id/centerImage"
