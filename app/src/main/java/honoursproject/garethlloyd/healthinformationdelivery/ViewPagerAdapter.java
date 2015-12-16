@@ -100,8 +100,12 @@ public class ViewPagerAdapter extends PagerAdapter implements IconPagerAdapter {
     }
 
     @Override
-    public int getIconResId(int index) {
+    public CharSequence getPageTitle(int position) {
+        return titles[position];
+    }
 
+    @Override
+    public int getIconResId(int index) {
         return icons[index];
     }
 

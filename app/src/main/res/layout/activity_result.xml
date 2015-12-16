@@ -48,8 +48,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:numStars="3"
+            android:isIndicator="true"
             android:layout_alignBottom="@+id/imageWalk"
-            android:layout_centerHorizontal="true" />
+            android:layout_centerHorizontal="true"
+            android:clickable="false"/>
 
         <TextView
             android:id="@+id/textStep"
@@ -74,8 +76,10 @@
             android:layout_height="wrap_content"
             android:nestedScrollingEnabled="false"
             android:numStars="3"
+            android:isIndicator="true"
             android:layout_above="@+id/imageFruit"
-            android:layout_alignStart="@+id/textFruit" />
+            android:layout_alignStart="@+id/textFruit"
+            android:clickable="false"/>
 
         <TextView
             android:id="@+id/textActivity"
@@ -100,7 +104,9 @@
             android:layout_height="wrap_content"
             android:numStars="3"
             android:layout_below="@+id/textFruit"
-            android:layout_centerHorizontal="true" />
+            android:isIndicator="true"
+            android:layout_centerHorizontal="true"
+            android:clickable="false"/>
 
         <TextView
             android:id="@+id/textFruit"
@@ -124,6 +130,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:numStars="3"
+            android:isIndicator="true"
             android:layout_alignBottom="@+id/imageWater"
             android:layout_alignStart="@+id/ratingBarStep" />
 

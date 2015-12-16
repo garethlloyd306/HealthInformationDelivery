@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">HealthInformationDelivery</string>
-    <string name="title_activity_result">ResultActivity</string>
+    <string name="app_name">Health </string>
+    <string name="title_activity_result">Results</string>
 </resources>
