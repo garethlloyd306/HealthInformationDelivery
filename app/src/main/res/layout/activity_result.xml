@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -10,8 +10,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.example.admin.honourproject1.ResultActivity"
-    tools:showIn="@layout/activity_result">
+    tools:context="com.example.admin.honourproject1.ResultActivity">
 
     <TextView
         android:id="@+id/result_title"
@@ -19,21 +18,45 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:text="Results"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
 
     <TextView
         android:id="@+id/dateText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="10dp"
-        android:layout_marginTop="10dp"
         android:text="30/11/2015"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:gravity="center_vertical"
+        android:layout_below="@+id/result_title"
+        android:layout_centerHorizontal="true" />
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/left_arrow"
+        android:id="@+id/left_arrow"
+        android:layout_above="@+id/relativeLayout"
+        android:layout_alignParentStart="true" />
+
+    <ImageView
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:id="@+id/right_arrow"
+        android:src="@drawable/right_arrow"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true" />
+
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/dateText"
+        android:id="@+id/relativeLayout"
+        android:layout_marginTop="30dp">
 
         <ImageView
             android:id="@+id/imageWalk"
@@ -58,7 +81,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Steps: 0"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:layout_alignTop="@+id/imageWalk"
             android:layout_alignStart="@+id/ratingBarStep" />
 
@@ -74,7 +97,6 @@
             android:id="@+id/ratingBarActivity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false"
             android:numStars="3"
             android:isIndicator="true"
             android:layout_above="@+id/imageFruit"
@@ -86,7 +108,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Small Text"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:layout_above="@+id/ratingBarActivity"
             android:layout_alignStart="@+id/ratingBarActivity" />
 
@@ -113,7 +135,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Steps: 0"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:layout_alignTop="@+id/imageFruit"
             android:layout_alignStart="@+id/ratingBarFruit" />
 
@@ -139,9 +161,18 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Small Text"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textAppearance="?android:attr/textAppearanceLarge"
             android:layout_above="@+id/ratingBarWater"
             android:layout_alignStart="@+id/ratingBarWater" />
 
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Home"
+            android:id="@+id/buttonHome"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true" />
+
     </RelativeLayout>
-</LinearLayout>
+
+</RelativeLayout>

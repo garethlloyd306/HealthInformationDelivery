@@ -3,7 +3,9 @@ package honoursproject.garethlloyd.healthinformationdelivery;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
@@ -84,6 +86,48 @@ public class ViewPagerAdapter extends PagerAdapter implements IconPagerAdapter {
         int progress = (int) (((double) values[position] / (double) targets[position]) * 100.f);
         if (progress >= 100) {
             progress = 100;
+        }
+        if(position ==0){
+            if(values[position] >= 10000){
+                donut.setFinishedStrokeColor(ContextCompat.getColor(context, R.color.gold));
+            }else if(values[position] >= 7500){
+                donut.setFinishedStrokeColor(ContextCompat.getColor(context, R.color.silver));
+            }else if (values[position] >= 5000) {
+                donut.setFinishedStrokeColor(ContextCompat.getColor(context, R.color.bronze));
+            }else{
+                donut.setFinishedStrokeColor(Color.RED);
+            }
+        }else if (position ==1){
+            if(values[position] >= 8){
+                donut.setFinishedStrokeColor(ContextCompat.getColor(context, R.color.gold));
+            }else if(values[position] >= 6){
+                donut.setFinishedStrokeColor(ContextCompat.getColor(context, R.color.silver));
+            }else if (values[position] >= 4) {
+                donut.setFinishedStrokeColor(ContextCompat.getColor(context, R.color.bronze));
+            }else{
+                donut.setFinishedStrokeColor(Color.RED);
+            }
+
+        }else if(position ==2){
+            if(values[position] >= 5){
+                donut.setFinishedStrokeColor(ContextCompat.getColor(context, R.color.gold));
+            }else if(values[position] >= 4){
+                donut.setFinishedStrokeColor(ContextCompat.getColor(context, R.color.silver));
+            }else if (values[position] >= 2) {
+                donut.setFinishedStrokeColor(ContextCompat.getColor(context, R.color.bronze));
+            }else{
+                donut.setFinishedStrokeColor(Color.RED);
+            }
+        }else if(position ==3){
+            if(values[position] >= 30){
+                donut.setFinishedStrokeColor(ContextCompat.getColor(context, R.color.gold));
+            }else if(values[position] >= 20){
+                donut.setFinishedStrokeColor(ContextCompat.getColor(context, R.color.silver));
+            }else if (values[position] >= 10) {
+                donut.setFinishedStrokeColor(ContextCompat.getColor(context, R.color.bronze));
+            }else{
+                donut.setFinishedStrokeColor(Color.RED);
+            }
         }
         donut.setProgress(progress);
         Button daily = (Button) itemView.findViewById(R.id.button);

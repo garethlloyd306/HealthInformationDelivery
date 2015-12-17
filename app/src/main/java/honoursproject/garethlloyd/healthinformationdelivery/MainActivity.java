@@ -10,6 +10,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -71,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         icons = new int[]{R.drawable.walk_small, R.drawable.water_small, R.drawable.fruit_small, R.drawable.clock_small};
         images = new int[] {R.drawable.walk_large, R.drawable.water_large, R.drawable.fruit_and_carrot, R.drawable.clock_large};
         titles = new String[]{"Steps", "Water", " Food", " Activity"};
-        targets = new int[]{10000, 8, 5, 60};
+        targets = new int[]{10000, 8, 5, 30};
         texts = new String[] {"Steps", "Glasses Of Water", "Fruit and Vegetables", "Activity Time"};
         viewPager = (ViewPager) findViewById(R.id.pager);
         adapter = new ViewPagerAdapter(MainActivity.this, values, icons, targets, titles, images, texts);
@@ -229,12 +230,15 @@ public class MainActivity extends AppCompatActivity {
                 db.updateWater(result, date);
                 readDataFromDB();
                 adapter.notifyDataSetChanged();
+                Toast.makeText(this, "Well Done! ", Toast.LENGTH_SHORT).show();
 
             } else if (view.getTag() == "Fruit") {
                 int result = values[2] + 1;
                 db.updateFruit(result, date);
                 readDataFromDB();
                 adapter.notifyDataSetChanged();
+                Toast.makeText(this, "Well Done! ", Toast.LENGTH_SHORT).show();
+
             }
         }
     }

@@ -10,8 +10,6 @@ android:layout_height="fill_parent">
         android:text="Gareth Lloyd"
         android:id="@+id/textView"
         android:layout_alignParentTop="true"
-        android:layout_alignRight="@+id/walkingImage"
-        android:layout_alignEnd="@+id/walkingImage"
         android:layout_marginTop="10dp"
         android:layout_centerHorizontal="true" />
 
@@ -22,7 +20,6 @@ android:layout_height="fill_parent">
         android:rotation="-90"
         custom:donut_progress="0"
         custom:donut_unfinished_color="#ffffff"
-        custom:donut_finished_color="#0000ff"
         custom:donut_text_size="0dp"
         android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true"
