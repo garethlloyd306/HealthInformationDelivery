@@ -1,14 +1,23 @@
 package honoursproject.garethlloyd.healthinformationdelivery;
 
 
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,24 +29,15 @@ import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.fitness.Fitness;
-import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
-import com.google.android.gms.fitness.request.DataReadRequest;
-import com.google.android.gms.fitness.request.DataTypeCreateRequest;
 import com.google.android.gms.fitness.result.DailyTotalResult;
-import com.google.android.gms.fitness.result.DataReadResult;
-import com.google.android.gms.fitness.result.DataTypeResult;
-import com.viewpagerindicator.IconPageIndicator;
 import com.viewpagerindicator.TabPageIndicator;
-import com.viewpagerindicator.TitlePageIndicator;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.text.SimpleDateFormat;
-import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -53,12 +53,12 @@ public class MainActivity extends AppCompatActivity {
     int steps;
     int water;
     int fruit;
-    int activity;
+    int time;
     int[] icons;
     int[] values;
     String[] titles;
     int[] targets;
-    int [] images;
+    int[] images;
     String[] texts;
     TabPageIndicator mIndicator;
     UnderlinePageIndicator mIndicator1;
@@ -68,12 +68,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         text = (TextView) findViewById(R.id.text);
-        values = new int[]{0, 0, 0,0};
+        values = new int[]{0, 0, 0, 0};
         icons = new int[]{R.drawable.walk_small, R.drawable.water_small, R.drawable.fruit_small, R.drawable.clock_small};
-        images = new int[] {R.drawable.walk_large, R.drawable.water_large, R.drawable.fruit_and_carrot, R.drawable.clock_large};
+        images = new int[]{R.drawable.walk_large, R.drawable.water_large, R.drawable.fruit_and_carrot, R.drawable.clock_large};
         titles = new String[]{"Steps", "Water", " Food", " Activity"};
         targets = new int[]{10000, 8, 5, 30};
-        texts = new String[] {"Steps", "Glasses Of Water", "Fruit and Vegetables", "Activity Time"};
+        texts = new String[]{"Steps", "Glasses Of Water", "Fruit and Vegetables", "Activity Time"};
         viewPager = (ViewPager) findViewById(R.id.pager);
         adapter = new ViewPagerAdapter(MainActivity.this, values, icons, targets, titles, images, texts);
         viewPager.setAdapter(adapter);
@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
         DataModel data = new DataModel();
         String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
         boolean exists = db.rowExists(date);
-        if(!exists) {
+        if (!exists) {
             data.setDate(date);
             data.setActivityTime(0);
             data.setFruitAndVeg(0);
@@ -110,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
                             public void onConnected(Bundle bundle) {
                                 Log.i(TAG, "Connected!!!");
                                 getStepTotal();
+                                getActivityTime();
                             }
 
                             @Override
@@ -186,17 +187,28 @@ public class MainActivity extends AppCompatActivity {
                         : totalSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
                 steps = (int) total;
                 String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-                db.updateSteps(steps,date);
+                db.updateSteps(steps, date);
                 readDataFromDB();
                 adapter.notifyDataSetChanged();
             }
         });
     }
 
-    public void readDataFromDB(){
+    private void getActivityTime() {
+
+        time = (int) 0;
+        String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+        db.updateActivity(time, date);
+        readDataFromDB();
+        adapter.notifyDataSetChanged();
+
+    }
+
+
+    public void readDataFromDB() {
         String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
         DataModel data = db.readData(date);
-        Log.d("Data", "Steps: " + data.getSteps() + "Water " + data.getWater() + "Fruit " + data.getFruitAndVeg() + "Activity" + data.getActivityTime());
+        Log.d("Data", "Steps: " + db + data.getSteps() + "Water " + data.getWater() + "Fruit " + data.getFruitAndVeg() + "Activity" + data.getActivityTime());
         values[0] = data.getSteps();
         values[1] = data.getWater();
         values[2] = data.getFruitAndVeg();
@@ -224,23 +236,64 @@ public class MainActivity extends AppCompatActivity {
 
     public void updateData(View view) {
         String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-        if (view.getTag() !=null){
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view1 = inflater.inflate(R.layout.custom_dialog, null);
+        builder.setView(view1);
+        TextView title = new TextView(this);
+        title.setText("Well Done!");
+        title.setGravity(Gravity.CENTER);
+        title.setTextColor(Color.BLACK);
+        title.setTextSize(20);
+        builder.setCustomTitle(title);
+        TextView text1 = (TextView) view1.findViewById(R.id.textAward);
+        ImageView imageAward = (ImageView) view1.findViewById(R.id.image);
+        Button close = (Button) view1.findViewById(R.id.close);
+        final AlertDialog dialog = builder.create();
+        close.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               dialog.dismiss();
+            }
+        });
+        if (view.getTag() != null) {
             if (view.getTag().toString() == "Water") {
                 int result = values[1] + 1;
                 db.updateWater(result, date);
                 readDataFromDB();
                 adapter.notifyDataSetChanged();
-                Toast.makeText(this, "Well Done! ", Toast.LENGTH_SHORT).show();
-
+                if(result == 4) {
+                    text1.setText("Bronze Award!");
+                    imageAward.setImageResource(R.drawable.bronze_star);
+                    dialog.show();
+                }else  if(result == 6) {
+                    text1.setText("Silver Award!");
+                    imageAward.setImageResource(R.drawable.silver_star);
+                    dialog.show();
+                }else if(result == 8) {
+                    text1.setText("Gold Award!");
+                    imageAward.setImageResource(R.drawable.gold_star);
+                    dialog.show();
+                }
             } else if (view.getTag() == "Fruit") {
                 int result = values[2] + 1;
                 db.updateFruit(result, date);
                 readDataFromDB();
                 adapter.notifyDataSetChanged();
-                Toast.makeText(this, "Well Done! ", Toast.LENGTH_SHORT).show();
-
+                if(result == 2) {
+                    text1.setText("Bronze Award!");
+                    imageAward.setImageResource(R.drawable.bronze_star);
+                    dialog.show();
+                }else  if(result == 4) {
+                    text1.setText("Silver Award!");
+                    imageAward.setImageResource(R.drawable.silver_star);
+                    dialog.show();
+                }else if(result == 5) {
+                    text1.setText("Gold Award!");
+                    imageAward.setImageResource(R.drawable.gold_star);
+                    dialog.show();
+                }
             }
         }
     }
-
 }

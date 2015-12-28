@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Health </string>
     <string name="title_activity_result">Results</string>
+    <string name="stringEarned">You have earned:</string>
 </resources>
