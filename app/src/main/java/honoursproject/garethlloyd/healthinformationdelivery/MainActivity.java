@@ -1,16 +1,22 @@
 package honoursproject.garethlloyd.healthinformationdelivery;
 
 
+import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -29,15 +35,27 @@ import com.google.android.gms.common.api.PendingResult;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.fitness.Fitness;
+import com.google.android.gms.fitness.data.Bucket;
+import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
+import com.google.android.gms.fitness.data.Session;
+import com.google.android.gms.fitness.data.Value;
+import com.google.android.gms.fitness.request.DataReadRequest;
+import com.google.android.gms.fitness.request.SessionReadRequest;
 import com.google.android.gms.fitness.result.DailyTotalResult;
+import com.google.android.gms.fitness.result.DataReadResult;
+import com.google.android.gms.fitness.result.SessionReadResult;
 import com.viewpagerindicator.TabPageIndicator;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
+import java.text.DateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.text.SimpleDateFormat;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -62,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
     String[] texts;
     TabPageIndicator mIndicator;
     UnderlinePageIndicator mIndicator1;
+    String SAMPLE_SESSION_NAME;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,12 +116,26 @@ public class MainActivity extends AppCompatActivity {
         db.readData(date);
         buildFitnessClient();
         readDataFromDB();
+        AlarmManager alarmMgr;
+        PendingIntent alarmIntent;
+        alarmMgr = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlarmReceiver.class);
+        alarmIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.set(Calendar.HOUR_OF_DAY, 15);
+        calendar.set(Calendar.MINUTE, 0);
+        alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
+                AlarmManager.INTERVAL_DAY, alarmIntent);
+        SAMPLE_SESSION_NAME = "Time";
+
     }
 
     public void buildFitnessClient() {
         mClient = new GoogleApiClient.Builder(MainActivity.this)
                 .addApi(Fitness.HISTORY_API)
                 .addApi(Fitness.CONFIG_API)
+                .addApi(Fitness.SESSIONS_API)
                 .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE))
                 .addConnectionCallbacks(
                         new GoogleApiClient.ConnectionCallbacks() {
@@ -110,7 +143,8 @@ public class MainActivity extends AppCompatActivity {
                             public void onConnected(Bundle bundle) {
                                 Log.i(TAG, "Connected!!!");
                                 getStepTotal();
-                                getActivityTime();
+                               InsertAndVerifyTask task = new InsertAndVerifyTask();
+                                task.execute();
                             }
 
                             @Override
@@ -194,106 +228,175 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void getActivityTime() {
+    private class InsertAndVerifyTask extends AsyncTask<Void, Void, Void> {
+        protected Void doInBackground(Void... params) {
+            Calendar cal = Calendar.getInstance();
+            Date now = new Date();
+            cal.setTime(now);
+            long endTime = cal.getTimeInMillis();
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE,0);
+            long startTime = cal.getTimeInMillis();
 
-        time = (int) 0;
-        String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-        db.updateActivity(time, date);
-        readDataFromDB();
-        adapter.notifyDataSetChanged();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+            Log.i(TAG, "Range Start: " + dateFormat.format(startTime));
+            Log.i(TAG, "Range End: " + dateFormat.format(endTime));
 
-    }
+            DataReadRequest readRequest = new DataReadRequest.Builder()
+                    // The data request can specify multiple data types to return, effectively
+                    // combining multiple data queries into one call.
+                    // In this example, it's very unlikely that the request is for several hundred
+                    // datapoints each consisting of a few steps and a timestamp.  The more likely
+                    // scenario is wanting to see how many steps were walked per day, for 7 days.
+                    .aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY)
+                            // Analogous to a "Group By" in SQL, defines how data should be aggregated.
+                            // bucketByTime allows for a time span, whereas bucketBySession would allow
+                            // bucketing by "sessions", which would need to be defined in code.
+                    .bucketByTime(1, TimeUnit.DAYS)
+                    .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
+                    .build();
+
+            DataReadResult dataReadResult =
+                    Fitness.HistoryApi.readData(mClient, readRequest).await(1, TimeUnit.MINUTES);
+
+// Get a list of the sessions that match the criteria to check the result.
+            Log.i(TAG, "Session read was successful. Number of returned sessions is: "
+                    + dataReadResult.getBuckets().size());
 
 
-    public void readDataFromDB() {
-        String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-        DataModel data = db.readData(date);
-        Log.d("Data", "Steps: " + db + data.getSteps() + "Water " + data.getWater() + "Fruit " + data.getFruitAndVeg() + "Activity" + data.getActivityTime());
-        values[0] = data.getSteps();
-        values[1] = data.getWater();
-        values[2] = data.getFruitAndVeg();
-        values[3] = data.getActivityTime();
-        adapter.notifyDataSetChanged();
-    }
+            for (Bucket bucket: dataReadResult.getBuckets()){
+                // Process the session
+                DataSet data = bucket.getDataSet(DataType.AGGREGATE_ACTIVITY_SUMMARY);
+                dumpDataSet(data);
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_OAUTH) {
-            authInProgress = false;
-            if (resultCode == RESULT_OK) {
-                // Make sure the app is not already connected or attempting to connect
-                if (!mClient.isConnecting() && !mClient.isConnected()) {
-                    mClient.connect();
-                }
             }
+            return null;
         }
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putBoolean(AUTH_PENDING, authInProgress);
-    }
+        public void readDataFromDB() {
+            String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+            DataModel data = db.readData(date);
+            Log.d("Data", "Steps: " + db + data.getSteps() + "Water " + data.getWater() + "Fruit " + data.getFruitAndVeg() + "Activity" + data.getActivityTime());
+            values[0] = data.getSteps();
+            values[1] = data.getWater();
+            values[2] = data.getFruitAndVeg();
+            values[3] = data.getActivityTime();
+            adapter.notifyDataSetChanged();
+        }
 
-    public void updateData(View view) {
-        String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-        final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = (LayoutInflater)this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View view1 = inflater.inflate(R.layout.custom_dialog, null);
-        builder.setView(view1);
-        TextView title = new TextView(this);
-        title.setText("Well Done!");
-        title.setGravity(Gravity.CENTER);
-        title.setTextColor(Color.BLACK);
-        title.setTextSize(20);
-        builder.setCustomTitle(title);
-        TextView text1 = (TextView) view1.findViewById(R.id.textAward);
-        ImageView imageAward = (ImageView) view1.findViewById(R.id.image);
-        Button close = (Button) view1.findViewById(R.id.close);
-        final AlertDialog dialog = builder.create();
-        close.setOnClickListener(new View.OnClickListener() {
+        @Override
+        protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+            if (requestCode == REQUEST_OAUTH) {
+                authInProgress = false;
+                if (resultCode == RESULT_OK) {
+                    // Make sure the app is not already connected or attempting to connect
+                    if (!mClient.isConnecting() && !mClient.isConnected()) {
+                        mClient.connect();
+                    }
+                }
+            }
+        }
+
             @Override
-            public void onClick(View v) {
-               dialog.dismiss();
+            protected void onSaveInstanceState(Bundle outState) {
+                outState.putBoolean(AUTH_PENDING, authInProgress);
             }
-        });
-        if (view.getTag() != null) {
-            if (view.getTag().toString() == "Water") {
-                int result = values[1] + 1;
-                db.updateWater(result, date);
-                readDataFromDB();
-                adapter.notifyDataSetChanged();
-                if(result == 4) {
-                    text1.setText("Bronze Award!");
-                    imageAward.setImageResource(R.drawable.bronze_star);
-                    dialog.show();
-                }else  if(result == 6) {
-                    text1.setText("Silver Award!");
-                    imageAward.setImageResource(R.drawable.silver_star);
-                    dialog.show();
-                }else if(result == 8) {
-                    text1.setText("Gold Award!");
-                    imageAward.setImageResource(R.drawable.gold_star);
-                    dialog.show();
+
+            public void updateData(View view) {
+                String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View view1 = inflater.inflate(R.layout.custom_dialog, null);
+                builder.setView(view1);
+                TextView title = new TextView(this);
+                title.setText("Well Done!");
+                title.setGravity(Gravity.CENTER);
+                title.setTextColor(Color.BLACK);
+                title.setTextSize(20);
+                title.setPadding(10, 10, 10, 10);
+                builder.setCustomTitle(title);
+                TextView text1 = (TextView) view1.findViewById(R.id.textAward);
+                ImageView imageAward = (ImageView) view1.findViewById(R.id.image);
+                Button close = (Button) view1.findViewById(R.id.close);
+                final AlertDialog dialog = builder.create();
+                close.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+                if (view.getTag() != null) {
+                    if (view.getTag().toString() == "Water") {
+                        int result = values[1] + 1;
+                        db.updateWater(result, date);
+                        readDataFromDB();
+                        adapter.notifyDataSetChanged();
+                        if (result == 4) {
+                            text1.setText("Bronze Award!");
+                            imageAward.setImageResource(R.drawable.bronze_star);
+                            dialog.show();
+                        } else if (result == 6) {
+                            text1.setText("Silver Award!");
+                            imageAward.setImageResource(R.drawable.silver_star);
+                            dialog.show();
+                        } else if (result == 8) {
+                            text1.setText("Gold Award!");
+                            imageAward.setImageResource(R.drawable.gold_star);
+                            dialog.show();
+                        }
+                    } else if (view.getTag() == "Fruit") {
+                        int result = values[2] + 1;
+                        db.updateFruit(result, date);
+                        readDataFromDB();
+                        adapter.notifyDataSetChanged();
+                        if (result == 2) {
+                            text1.setText("Bronze Award!");
+                            imageAward.setImageResource(R.drawable.bronze_star);
+                            dialog.show();
+                        } else if (result == 4) {
+                            text1.setText("Silver Award!");
+                            imageAward.setImageResource(R.drawable.silver_star);
+                            dialog.show();
+                        } else if (result == 5) {
+                            text1.setText("Gold Award!");
+                            imageAward.setImageResource(R.drawable.gold_star);
+                            dialog.show();
+                        }
+                    }
                 }
-            } else if (view.getTag() == "Fruit") {
-                int result = values[2] + 1;
-                db.updateFruit(result, date);
-                readDataFromDB();
-                adapter.notifyDataSetChanged();
-                if(result == 2) {
-                    text1.setText("Bronze Award!");
-                    imageAward.setImageResource(R.drawable.bronze_star);
-                    dialog.show();
-                }else  if(result == 4) {
-                    text1.setText("Silver Award!");
-                    imageAward.setImageResource(R.drawable.silver_star);
-                    dialog.show();
-                }else if(result == 5) {
-                    text1.setText("Gold Award!");
-                    imageAward.setImageResource(R.drawable.gold_star);
-                    dialog.show();
+            }
+
+
+    private void dumpDataSet(DataSet dataSet) {
+        Log.i(TAG, "Data returned for Data type: " + dataSet.getDataType().getName());
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy   HH:mm");
+        long totalDuration =0;
+
+        for (DataPoint dp : dataSet.getDataPoints()) {
+            Log.i(TAG, "Data point:");
+            Log.i(TAG, "\tType: " + dp.getDataType().getName());
+            Log.i(TAG, "\tStart: " + dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS)));
+            Log.i(TAG, "\tEnd: " + dateFormat.format(dp.getEndTime(TimeUnit.MILLISECONDS)));
+                if(dp.getValue(Field.FIELD_ACTIVITY).asInt()!=3){
+                        long duration = TimeUnit.MILLISECONDS.toMinutes(dp.getValue(Field.FIELD_DURATION).asInt());
+                        totalDuration += duration;
+                        Log.i(TAG, "Duration  " + duration);
                 }
+            final int test = (int) totalDuration;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+                    db.updateActivity((int) test, date);
+                    readDataFromDB();
+                    adapter.notifyDataSetChanged();
+
+
+                }
+            });
+
+
             }
         }
     }
-}
