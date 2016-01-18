@@ -3,8 +3,6 @@ package honoursproject.garethlloyd.healthinformationdelivery;
 
 import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -12,20 +10,16 @@ import android.content.IntentSender;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -40,21 +34,15 @@ import com.google.android.gms.fitness.data.DataPoint;
 import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
-import com.google.android.gms.fitness.data.Session;
-import com.google.android.gms.fitness.data.Value;
 import com.google.android.gms.fitness.request.DataReadRequest;
-import com.google.android.gms.fitness.request.SessionReadRequest;
 import com.google.android.gms.fitness.result.DailyTotalResult;
 import com.google.android.gms.fitness.result.DataReadResult;
-import com.google.android.gms.fitness.result.SessionReadResult;
 import com.viewpagerindicator.TabPageIndicator;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
-import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.text.SimpleDateFormat;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
@@ -81,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     TabPageIndicator mIndicator;
     UnderlinePageIndicator mIndicator1;
     String SAMPLE_SESSION_NAME;
+    String lastActive;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
             data.setFruitAndVeg(0);
             data.setSteps(0);
             data.setWater(0);
-            db.addData(data);
+            db.addHealthData(data);
         }
         db.readData(date);
         buildFitnessClient();
@@ -129,6 +118,9 @@ public class MainActivity extends AppCompatActivity {
                 AlarmManager.INTERVAL_DAY, alarmIntent);
         SAMPLE_SESSION_NAME = "Time";
 
+         lastActive = db.updateLastActive(date);
+
+
     }
 
     public void buildFitnessClient() {
@@ -143,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
                             public void onConnected(Bundle bundle) {
                                 Log.i(TAG, "Connected!!!");
                                 getStepTotal();
-                               InsertAndVerifyTask task = new InsertAndVerifyTask();
+                                InsertAndVerifyTask task = new InsertAndVerifyTask();
                                 task.execute();
                             }
 
@@ -327,8 +319,13 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
                 if (view.getTag() != null) {
-                    if (view.getTag().toString() == "Water") {
-                        int result = values[1] + 1;
+                    int result;
+                    if (view.getTag().toString() == "plusWater" || view.getTag().toString()=="minusWater") {
+                        if (view.getTag().toString() == "plusWater"){
+                             result = values[1] + 1;
+                        }else{
+                            result = values[1]-1;
+                        }
                         db.updateWater(result, date);
                         readDataFromDB();
                         adapter.notifyDataSetChanged();
@@ -345,8 +342,12 @@ public class MainActivity extends AppCompatActivity {
                             imageAward.setImageResource(R.drawable.gold_star);
                             dialog.show();
                         }
-                    } else if (view.getTag() == "Fruit") {
-                        int result = values[2] + 1;
+                    } else if (view.getTag().toString() == "minusFruit" || view.getTag().toString()=="plusFruit") {
+                        if (view.getTag().toString() == "plusFruit"){
+                            result = values[2] + 1;
+                        }else{
+                            result = values[2]- 1;
+                        }
                         db.updateFruit(result, date);
                         readDataFromDB();
                         adapter.notifyDataSetChanged();
@@ -374,21 +375,22 @@ public class MainActivity extends AppCompatActivity {
         long totalDuration =0;
 
         for (DataPoint dp : dataSet.getDataPoints()) {
-            Log.i(TAG, "Data point:");
-            Log.i(TAG, "\tType: " + dp.getDataType().getName());
-            Log.i(TAG, "\tStart: " + dateFormat.format(dp.getStartTime(TimeUnit.MILLISECONDS)));
-            Log.i(TAG, "\tEnd: " + dateFormat.format(dp.getEndTime(TimeUnit.MILLISECONDS)));
-                if(dp.getValue(Field.FIELD_ACTIVITY).asInt()!=3){
+            long duration1 = TimeUnit.MILLISECONDS.toMinutes(dp.getValue(Field.FIELD_DURATION).asInt());
+            //totalDuration += duration;
+            int activity = dp.getValue(Field.FIELD_ACTIVITY).asInt();
+            Log.i("here1234", "HEREEEEREREREREREREREREREREREREREREEEEEEEEEEEEE :           " + duration1);
+                if(activity != 3 && activity !=4 && activity !=0){
                         long duration = TimeUnit.MILLISECONDS.toMinutes(dp.getValue(Field.FIELD_DURATION).asInt());
                         totalDuration += duration;
-                        Log.i(TAG, "Duration  " + duration);
+                        Log.i("here1234", "Duration  " + duration);
+                        Log.i("here1234", "Activity "+ dp.getValue(Field.FIELD_ACTIVITY).asInt());
                 }
             final int test = (int) totalDuration;
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
                     String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-                    db.updateActivity((int) test, date);
+                    db.updateActivity(test, date);
                     readDataFromDB();
                     adapter.notifyDataSetChanged();
 

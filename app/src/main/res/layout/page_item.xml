@@ -4,15 +4,6 @@
 android:layout_width="fill_parent"
 android:layout_height="fill_parent">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Gareth Lloyd"
-        android:id="@+id/textView"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="10dp"
-        android:layout_centerHorizontal="true" />
-
     <com.github.lzyzsd.circleprogress.DonutProgress
         android:id="@+id/progressBar"
         android:layout_width="275dp"
@@ -21,9 +12,8 @@ android:layout_height="fill_parent">
         custom:donut_progress="0"
         custom:donut_unfinished_color="#ffffff"
         custom:donut_text_size="0dp"
-        android:layout_below="@+id/textView"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp" />
+        android:layout_marginTop="90dp" />
 
     <ImageView
         android:id="@+id/centerImage"
@@ -36,6 +26,26 @@ android:layout_height="fill_parent">
         android:layout_alignBottom="@+id/progressBar"
         android:layout_centerHorizontal="true" />
 
+    <ImageView
+        android:id="@+id/plus"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/plus"
+        android:clickable="true"
+        android:onClick="updateData"
+        android:layout_below="@id/centerImage"
+        android:layout_toStartOf="@id/centerImage" />
+
+    <ImageView
+        android:id="@+id/minus"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:src="@drawable/minus"
+        android:clickable="true"
+        android:onClick="updateData"
+        android:layout_below="@id/centerImage"
+        android:layout_toEndOf="@id/centerImage" />
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -43,19 +53,53 @@ android:layout_height="fill_parent">
         android:id="@+id/stepText"
         android:textSize="30sp"
         android:textAlignment="center"
-        android:layout_below="@+id/progressBar"
-        android:layout_alignLeft="@+id/button"
-        android:layout_alignStart="@+id/button"
-        android:layout_marginTop="26dp" />
+        android:layout_below="@+id/plus"
+        android:layout_marginTop="5dp" />
 
-    <Button
-        android:layout_width="match_parent"
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="55dp"
+        android:id="@+id/buttonTrophy"
+        android:src="@drawable/trophy"
+        android:layout_alignParentStart="true"
+        android:layout_marginLeft="15dp"
+        android:layout_marginTop="10dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Get Daily Result"
+        android:text="Trophies"
+        android:id="@+id/textTrophy"
+        android:layout_marginLeft="10dp"
+        android:layout_below="@+id/buttonTrophy"
+        android:layout_alignEnd="@+id/buttonTrophy" />
+
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="60dp"
         android:id="@+id/button"
+        android:src="@drawable/gold_star"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="5dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Daily Results"
+        android:id="@+id/textView"
+        android:layout_below="@+id/button"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="5dp"/>
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/imageView"
         android:layout_below="@+id/stepText"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="0dp"
+        android:src="@drawable/sound"/>
 
 
 </RelativeLayout>

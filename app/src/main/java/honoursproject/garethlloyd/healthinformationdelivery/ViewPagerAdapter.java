@@ -4,6 +4,7 @@ package honoursproject.garethlloyd.healthinformationdelivery;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.speech.tts.TextToSpeech;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
@@ -23,6 +24,7 @@ import com.viewpagerindicator.IconPagerAdapter;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import javax.xml.transform.Result;
 
@@ -36,6 +38,7 @@ public class ViewPagerAdapter extends PagerAdapter implements IconPagerAdapter {
     int[] images;
     String[] text;
     LayoutInflater inflater;
+    TextToSpeech textToSpeech;
 
     public ViewPagerAdapter(Context context, int[] values, int[] icons, int[] targets, String[] titles, int[] images, String[] text) {
         this.context = context;
@@ -45,6 +48,13 @@ public class ViewPagerAdapter extends PagerAdapter implements IconPagerAdapter {
         this.titles = titles;
         this.images = images;
         this.text = text;
+        textToSpeech = new TextToSpeech(context, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                textToSpeech.setLanguage(Locale.UK);
+            }
+        }
+        );
     }
 
     @Override
@@ -64,6 +74,8 @@ public class ViewPagerAdapter extends PagerAdapter implements IconPagerAdapter {
         TextView value;
         DonutProgress donut;
         ImageView imageView;
+        ImageView plusView;
+        ImageView minusView;
 
         inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -74,13 +86,24 @@ public class ViewPagerAdapter extends PagerAdapter implements IconPagerAdapter {
         value = (TextView) itemView.findViewById(R.id.stepText);
         donut = (DonutProgress) itemView.findViewById(R.id.progressBar);
         imageView = (ImageView) itemView.findViewById(R.id.centerImage);
+        plusView = (ImageView) itemView.findViewById(R.id.plus);
+        minusView = (ImageView) itemView.findViewById(R.id.minus);
+
 
 
         imageView.setImageResource(images[position]);
-        if (position == 1) {
-            imageView.setTag("Water");
-        } else if (position == 2) {
-            imageView.setTag("Fruit");
+        if (position == 0) {
+            plusView.setVisibility(View.INVISIBLE);
+            minusView.setVisibility(View.INVISIBLE);
+        } else if (position == 1) {
+            plusView.setTag("plusWater");
+            minusView.setTag("minusWater");
+        }else if (position==2){
+            plusView.setTag("plusFruit");
+            minusView.setTag("minusFruit");
+        }else if (position ==3){
+            plusView.setVisibility(View.INVISIBLE);
+            minusView.setVisibility(View.INVISIBLE);
         }
         value.setText(text[position] + ": " + values[position]);
         int progress = (int) (((double) values[position] / (double) targets[position]) * 100.f);
@@ -130,12 +153,33 @@ public class ViewPagerAdapter extends PagerAdapter implements IconPagerAdapter {
             }
         }
         donut.setProgress(progress);
-        Button daily = (Button) itemView.findViewById(R.id.button);
+        ImageView daily = (ImageView) itemView.findViewById(R.id.button);
         daily.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(context, ResultActivity.class);
                 context.startActivity(intent);
+            }
+        });
+
+        ImageView speech = (ImageView) itemView.findViewById(R.id.imageView);
+        speech.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if(position ==0){
+                    String text ="Well done, you've managed " + values[position] + " Steps today! Keep it up";
+                    textToSpeech.speak(text,TextToSpeech.QUEUE_FLUSH,null);
+                } else if(position ==1){
+                    String text ="Well done, you've drunk " + values[position] + "  glasses of water today! Keep it up";
+                    textToSpeech.speak(text,TextToSpeech.QUEUE_FLUSH,null);
+                } else if(position ==2){
+                    String text ="Well done, you've eaten " + values[position] + " fruit and vegetables today! Keep it up";
+                    textToSpeech.speak(text,TextToSpeech.QUEUE_FLUSH,null);
+                } else if(position ==3){
+                    String text ="Well done, you've been active for  " + values[position] + " minutes today! Keep it up";
+                    textToSpeech.speak(text,TextToSpeech.QUEUE_FLUSH,null);
+                }
             }
         });
         container.addView(itemView);
