@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:paddingBottom="@dimen/activity_vertical_margin"
+android:paddingLeft="@dimen/activity_horizontal_margin"
+android:paddingRight="@dimen/activity_horizontal_margin"
+android:paddingTop="@dimen/activity_vertical_margin"
+app:layout_behavior="@string/appbar_scrolling_view_behavior"
+tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivity">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center_horizontal"
+        android:text="Trophies"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <ImageView
+        android:id="@+id/trophy"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/title"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/trophy" />
+
+    <ImageView
+        android:id="@+id/trophy2"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_below="@id/title"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@id/trophy"
+        android:src="@drawable/trophy" />
+
+    <ImageView
+        android:id="@+id/trophy3"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_below="@id/title"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@id/trophy2"
+        android:src="@drawable/trophy" />
+
+    <ImageView
+        android:id="@+id/trophy4"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_below="@id/title"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@id/trophy3"
+        android:src="@drawable/trophy" />
+
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophyText"
+        android:layout_below="@id/trophy"
+        android:layout_marginTop="10dp"
+        android:text="2 Days"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:textAlignment="center" />
+
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy2Text"
+        android:layout_below="@id/trophy2"
+        android:layout_marginTop="10dp"
+        android:text="1 Week"
+        android:layout_toRightOf="@id/trophyText"
+        android:layout_marginLeft="30dp"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy3Text"
+        android:layout_below="@id/trophy3"
+        android:layout_marginTop="10dp"
+        android:text="2 Weeks"
+        android:layout_toRightOf="@id/trophy2Text"
+        android:layout_marginLeft="30dp"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy4Text"
+        android:layout_below="@id/trophy4"
+        android:layout_marginTop="10dp"
+        android:text="1 Month"
+        android:layout_toRightOf="@id/trophy3Text"
+        android:layout_marginLeft="30dp"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+
+    <ImageView
+        android:id="@+id/trophy5"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/trophyText"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/trophy" />
+
+    <ImageView
+        android:id="@+id/trophy6"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_below="@id/trophy2Text"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@id/trophy5"
+        android:src="@drawable/trophy" />
+
+    <ImageView
+        android:id="@+id/trophy7"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_below="@id/trophy3Text"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@id/trophy6"
+        android:src="@drawable/trophy" />
+
+    <ImageView
+        android:id="@+id/trophy8"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_below="@id/trophy4Text"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@id/trophy7"
+        android:src="@drawable/trophy" />
+
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy5Text"
+        android:layout_below="@id/trophy5"
+        android:layout_marginTop="10dp"
+        android:text="Gold Day"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy6Text"
+        android:layout_below="@id/trophy6"
+        android:layout_marginTop="10dp"
+        android:text="Gold 2 Days"
+        android:layout_toRightOf="@id/trophy5Text"
+        android:layout_marginLeft="30dp"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy7Text"
+        android:layout_below="@id/trophy7"
+        android:layout_marginTop="10dp"
+        android:text="Gold Week"
+        android:layout_toRightOf="@id/trophy6Text"
+        android:layout_marginLeft="30dp"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy8Text"
+        android:layout_below="@id/trophy8"
+        android:layout_marginTop="10dp"
+        android:text="Gold Month"
+        android:layout_toRightOf="@id/trophy7Text"
+        android:layout_marginLeft="30dp"
+        android:textColor="@color/black"
+        android:lines="2"
+        android:textSize="10sp"
+        android:textAlignment="center" />
+
+    <ImageView
+        android:id="@+id/trophy9"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/trophy5Text"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/trophy" />
+
+    <ImageView
+        android:id="@+id/trophy10"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_below="@id/trophy6Text"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@id/trophy9"
+        android:src="@drawable/trophy" />
+
+    <ImageView
+        android:id="@+id/trophy11"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_below="@id/trophy7Text"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@id/trophy10"
+        android:src="@drawable/trophy" />
+
+    <ImageView
+        android:id="@+id/trophy12"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_below="@id/trophy8Text"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@id/trophy11"
+        android:src="@drawable/trophy" />
+
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy9Text"
+        android:layout_below="@id/trophy9"
+        android:layout_marginTop="10dp"
+        android:text="Gold Steep Week"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy10Text"
+        android:layout_below="@id/trophy10"
+        android:layout_marginTop="10dp"
+        android:text="Silver Step Week"
+        android:layout_toRightOf="@id/trophy9Text"
+        android:layout_marginLeft="30dp"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy11Text"
+        android:layout_below="@id/trophy11"
+        android:layout_marginTop="10dp"
+        android:text="Bronze Step Week"
+        android:layout_toRightOf="@id/trophy10Text"
+        android:layout_marginLeft="30dp"
+        android:lines="2"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:textAlignment="center" />
+
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy12Text"
+        android:layout_below="@id/trophy12"
+        android:layout_marginTop="10dp"
+        android:text="Gold Water Week"
+        android:layout_toRightOf="@id/trophy11Text"
+        android:layout_marginLeft="30dp"
+        android:lines="2"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:textAlignment="center" />
+
+    <ImageView
+        android:id="@+id/trophy13"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/trophy9Text"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/trophy" />
+
+    <ImageView
+        android:id="@+id/trophy14"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_below="@id/trophy10Text"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@id/trophy13"
+        android:src="@drawable/trophy" />
+
+    <ImageView
+        android:id="@+id/trophy15"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_below="@id/trophy11Text"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@id/trophy14"
+        android:src="@drawable/trophy" />
+
+    <ImageView
+        android:id="@+id/trophy16"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_below="@id/trophy12Text"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@id/trophy15"
+        android:src="@drawable/trophy" />
+
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy13Text"
+        android:layout_below="@id/trophy13"
+        android:layout_marginTop="10dp"
+        android:text="Silver Water Week"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy14Text"
+        android:layout_below="@id/trophy14"
+        android:layout_marginTop="10dp"
+        android:text="Bronze Water Week"
+        android:layout_toRightOf="@id/trophy13Text"
+        android:layout_marginLeft="30dp"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy15Text"
+        android:layout_below="@id/trophy15"
+        android:layout_marginTop="10dp"
+        android:text="Gold Active Week"
+        android:layout_toRightOf="@id/trophy14Text"
+        android:layout_marginLeft="30dp"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy16Text"
+        android:layout_below="@id/trophy16"
+        android:layout_marginTop="10dp"
+        android:text="Silver Active Week"
+        android:layout_toRightOf="@id/trophy15Text"
+        android:layout_marginLeft="30dp"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+
+    <ImageView
+        android:id="@+id/trophy17"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/trophy13Text"
+        android:layout_marginTop="20dp"
+        android:src="@drawable/trophy" />
+
+    <ImageView
+        android:id="@+id/trophy18"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_below="@id/trophy14Text"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@id/trophy17"
+        android:src="@drawable/trophy" />
+
+    <ImageView
+        android:id="@+id/trophy19"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_below="@id/trophy15Text"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@id/trophy18"
+        android:src="@drawable/trophy" />
+
+    <ImageView
+        android:id="@+id/trophy20"
+        android:layout_width="55dp"
+        android:layout_height="55dp"
+        android:layout_below="@id/trophy16Text"
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="20dp"
+        android:layout_toRightOf="@id/trophy19"
+        android:src="@drawable/trophy" />
+
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy17Text"
+        android:layout_below="@id/trophy17"
+        android:layout_marginTop="10dp"
+        android:text="Bronze Active Week"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy18Text"
+        android:layout_below="@id/trophy18"
+        android:layout_marginTop="10dp"
+        android:text="Gold Fruit Week"
+        android:layout_toRightOf="@id/trophy17Text"
+        android:layout_marginLeft="30dp"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy19Text"
+        android:layout_below="@id/trophy19"
+        android:layout_marginTop="10dp"
+        android:text="Silver Fruit Week"
+        android:layout_toRightOf="@id/trophy18Text"
+        android:layout_marginLeft="30dp"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+
+    <TextView
+        android:layout_width="55dp"
+        android:layout_height="25dp"
+        android:id="@+id/trophy20Text"
+        android:layout_below="@id/trophy20"
+        android:layout_marginTop="10dp"
+        android:text="Bronze Fruit Week"
+        android:layout_toRightOf="@id/trophy19Text"
+        android:layout_marginLeft="30dp"
+        android:textColor="@color/black"
+        android:textSize="10sp"
+        android:lines="2"
+        android:textAlignment="center" />
+
+</RelativeLayout>

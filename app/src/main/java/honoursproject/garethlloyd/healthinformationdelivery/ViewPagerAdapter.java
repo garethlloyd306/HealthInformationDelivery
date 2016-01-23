@@ -162,6 +162,15 @@ public class ViewPagerAdapter extends PagerAdapter implements IconPagerAdapter {
             }
         });
 
+        ImageView trophy = (ImageView) itemView.findViewById(R.id.buttonTrophy);
+        trophy.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(context, TrophyActivity.class);
+                context.startActivity(intent);
+            }
+        });
+
         ImageView speech = (ImageView) itemView.findViewById(R.id.imageView);
         speech.setOnClickListener(new View.OnClickListener() {
             @Override

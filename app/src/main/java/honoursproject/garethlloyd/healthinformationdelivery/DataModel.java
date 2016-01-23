@@ -2,8 +2,8 @@ package honoursproject.garethlloyd.healthinformationdelivery;
 
 
 public class DataModel {
-
-    int fruit_and_veg;
+    //TODO make all private
+    private int fruit_and_veg;
     int water;
     String date;
     int steps;
