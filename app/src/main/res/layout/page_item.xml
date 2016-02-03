@@ -13,7 +13,7 @@ android:layout_height="fill_parent">
         custom:donut_unfinished_color="#ffffff"
         custom:donut_text_size="0dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="90dp" />
+        android:layout_marginTop="80dp" />
 
     <ImageView
         android:id="@+id/centerImage"

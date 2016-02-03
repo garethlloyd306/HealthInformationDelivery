@@ -105,7 +105,11 @@ public class ViewPagerAdapter extends PagerAdapter implements IconPagerAdapter {
             plusView.setVisibility(View.INVISIBLE);
             minusView.setVisibility(View.INVISIBLE);
         }
-        value.setText(text[position] + ": " + values[position]);
+        if(position!=3){
+            value.setText(text[position] + ": " + values[position]);
+        }else{
+            value.setText(text[position] + ": " + values[position] + " mins");
+        }
         int progress = (int) (((double) values[position] / (double) targets[position]) * 100.f);
         if (progress >= 100) {
             progress = 100;

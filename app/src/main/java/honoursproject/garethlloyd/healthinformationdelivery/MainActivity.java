@@ -112,8 +112,8 @@ public class MainActivity extends AppCompatActivity {
         alarmIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 06);
+        calendar.set(Calendar.HOUR_OF_DAY, 15);
+        calendar.set(Calendar.MINUTE, 00);
         alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
                 AlarmManager.INTERVAL_DAY, alarmIntent);
         SAMPLE_SESSION_NAME = "Time";
@@ -146,14 +146,15 @@ public class MainActivity extends AppCompatActivity {
                                 }
 
                                 Log.i("Active: ", "Today: " + today.compareTo(active.getTime()));
-                                    while (today.compareTo(active.getTime())>=0) {
-                                        GetSteps getSteps = new GetSteps();
-                                        Log.i("ACTIVE", new SimpleDateFormat("dd-MM-yyyy").format(active.getTime()));
-                                        getSteps.execute(new SimpleDateFormat("dd-MM-yyyy").format(active.getTime()));
-                                        GetActivityTime activityTime = new GetActivityTime();
-                                        activityTime.execute(new SimpleDateFormat("dd-MM-yyyy").format(active.getTime()));
-                                        active.add(Calendar.DAY_OF_YEAR, +1);
-                                        Log.i("Active: ", "Today: " + today.compareTo(active.getTime()));
+                                while (today.compareTo(active.getTime()) >= 0) {
+                                    GetSteps getSteps = new GetSteps();
+                                    Log.i("ACTIVE", new SimpleDateFormat("dd-MM-yyyy").format(active.getTime()));
+                                    getSteps.execute(new SimpleDateFormat("dd-MM-yyyy").format(active.getTime()));
+                                    GetActivityTime activityTime = new GetActivityTime();
+                                    activityTime.execute(new SimpleDateFormat("dd-MM-yyyy").format(active.getTime()));
+                                    checkTrophies(new SimpleDateFormat("dd-MM-yyyy").format(active.getTime()));
+                                    active.add(Calendar.DAY_OF_YEAR, +1);
+                                    Log.i("Active: ", "Today: " + today.compareTo(active.getTime()));
                                 }
                             }
 
@@ -239,18 +240,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private class GetSteps extends AsyncTask<String, Void, Void> {
-        protected Void doInBackground(String...args) {
+        protected Void doInBackground(String... args) {
             Calendar cal = Calendar.getInstance();
-            try{
+            try {
                 cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(args[0].toString()));
-            }catch (Exception e){
+            } catch (Exception e) {
 
             }
             cal.set(Calendar.HOUR_OF_DAY, 23);
             cal.set(Calendar.MINUTE, 59);
             long endTime = cal.getTimeInMillis();
             cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE,0);
+            cal.set(Calendar.MINUTE, 0);
             long startTime = cal.getTimeInMillis();
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
@@ -279,7 +280,7 @@ public class MainActivity extends AppCompatActivity {
                     + dataReadResult.getBuckets().size());
 
 
-            for (Bucket bucket: dataReadResult.getBuckets()){
+            for (Bucket bucket : dataReadResult.getBuckets()) {
                 // Process the session
                 DataSet data = bucket.getDataSet(DataType.AGGREGATE_STEP_COUNT_DELTA);
                 dumpStepDataSet(data);
@@ -291,20 +292,20 @@ public class MainActivity extends AppCompatActivity {
 
 
     private class GetActivityTime extends AsyncTask<String, Void, Void> {
-        protected Void doInBackground(String...args) {
+        protected Void doInBackground(String... args) {
             Calendar cal = Calendar.getInstance();
 
             Log.i("DATE", args[0].toString());
-            try{
+            try {
                 cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(args[0].toString()));
-            }catch (Exception e){
+            } catch (Exception e) {
 
             }
             cal.set(Calendar.HOUR_OF_DAY, 23);
             cal.set(Calendar.MINUTE, 59);
             long endTime = cal.getTimeInMillis();
             cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE,0);
+            cal.set(Calendar.MINUTE, 0);
             long startTime = cal.getTimeInMillis();
 
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
@@ -333,7 +334,7 @@ public class MainActivity extends AppCompatActivity {
                     + dataReadResult.getBuckets().size());
 
 
-            for (Bucket bucket: dataReadResult.getBuckets()){
+            for (Bucket bucket : dataReadResult.getBuckets()) {
                 // Process the session
                 DataSet data = bucket.getDataSet(DataType.AGGREGATE_ACTIVITY_SUMMARY);
                 dumpDataSet(data);
@@ -397,11 +398,11 @@ public class MainActivity extends AppCompatActivity {
         });
         if (view.getTag() != null) {
             int result;
-            if (view.getTag().toString() == "plusWater" || view.getTag().toString()=="minusWater") {
-                if (view.getTag().toString() == "plusWater"){
+            if (view.getTag().toString() == "plusWater" || view.getTag().toString() == "minusWater") {
+                if (view.getTag().toString() == "plusWater") {
                     result = values[1] + 1;
-                }else{
-                    result = values[1]-1;
+                } else {
+                    result = values[1] - 1;
                 }
                 db.updateWater(result, date);
                 readDataFromDB();
@@ -419,11 +420,11 @@ public class MainActivity extends AppCompatActivity {
                     imageAward.setImageResource(R.drawable.gold_star);
                     dialog.show();
                 }
-            } else if (view.getTag().toString() == "minusFruit" || view.getTag().toString()=="plusFruit") {
-                if (view.getTag().toString() == "plusFruit"){
+            } else if (view.getTag().toString() == "minusFruit" || view.getTag().toString() == "plusFruit") {
+                if (view.getTag().toString() == "plusFruit") {
                     result = values[2] + 1;
-                }else{
-                    result = values[2]- 1;
+                } else {
+                    result = values[2] - 1;
                 }
                 db.updateFruit(result, date);
                 readDataFromDB();
@@ -449,7 +450,7 @@ public class MainActivity extends AppCompatActivity {
     private void dumpDataSet(DataSet dataSet) {
         Log.i(TAG, "Data returned for Data type: " + dataSet.getDataType().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy   HH:mm");
-        long totalDuration =0;
+        long totalDuration = 0;
         Date date = new Date();
 
 
@@ -460,10 +461,10 @@ public class MainActivity extends AppCompatActivity {
             date.setTime(dp.getStartTime(TimeUnit.MILLISECONDS));
             Date endDate = new Date();
             endDate.setTime(dp.getEndTime(TimeUnit.MILLISECONDS));
-            Log.i("GarethTest" ,new SimpleDateFormat("dd-MM-yyyy").format(date));
-           //Log.i("GarethTest", "HEREEEEREREREREREREREREREREREREREREEEEEEEEEEEEE :           " + duration1);
+            Log.i("GarethTest", new SimpleDateFormat("dd-MM-yyyy").format(date));
+            //Log.i("GarethTest", "HEREEEEREREREREREREREREREREREREREREEEEEEEEEEEEE :           " + duration1);
             //Log.i("GarethTest", "Start : " + new SimpleDateFormat("dd-MM-yyyy").format(date) + "   End: " + new SimpleDateFormat("dd-MM-yyyy").format(endDate) + "  Activity: " + dp.getValue(Field.FIELD_ACTIVITY).asInt() + "   Duration:  " +TimeUnit.MILLISECONDS.toMinutes(dp.getValue(Field.FIELD_DURATION).asInt()));
-            if(activity != 3 && activity !=0) {
+            if (activity != 3 && activity != 0) {
                 long duration = TimeUnit.MILLISECONDS.toMinutes(dp.getValue(Field.FIELD_DURATION).asInt());
                 totalDuration += duration;
                 date.setTime(dp.getStartTime(TimeUnit.MILLISECONDS));
@@ -475,7 +476,7 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         String date = new SimpleDateFormat("dd-MM-yyyy").format(dateTest);
                         Log.i("GarethTest", "Start : " + date + "  Activity: " + " Duration:  " + test);
-                        if(test!=0){
+                        if (test != 0) {
                             db.updateActivity(test, date);
                         }
                         readDataFromDB();
@@ -492,7 +493,7 @@ public class MainActivity extends AppCompatActivity {
     private void dumpStepDataSet(DataSet dataSet) {
         Log.i(TAG, "Data returned for Data type: " + dataSet.getDataType().getName());
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy   HH:mm");
-        int steps =0;
+        int steps = 0;
         Date date = new Date();
 
 
@@ -502,27 +503,424 @@ public class MainActivity extends AppCompatActivity {
             date.setTime(dp.getStartTime(TimeUnit.MILLISECONDS));
             Date endDate = new Date();
             endDate.setTime(dp.getEndTime(TimeUnit.MILLISECONDS));
-            Log.i("GarethTest" ,new SimpleDateFormat("dd-MM-yyyy").format(date));
+            Log.i("GarethTest", new SimpleDateFormat("dd-MM-yyyy").format(date));
             //Log.i("GarethTest", "HEREEEEREREREREREREREREREREREREREREEEEEEEEEEEEE :           " + duration1);
             //Log.i("GarethTest", "Start : " + new SimpleDateFormat("dd-MM-yyyy").format(date) + "   End: " + new SimpleDateFormat("dd-MM-yyyy").format(endDate) + "  Activity: " + dp.getValue(Field.FIELD_ACTIVITY).asInt() + "   Duration:  " +TimeUnit.MILLISECONDS.toMinutes(dp.getValue(Field.FIELD_DURATION).asInt()));
 
-                final int test = (int) steps;
-                final Date dateTest = date;
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        String date = new SimpleDateFormat("dd-MM-yyyy").format(dateTest);
-                        Log.i("GarethTest", "Start : " + date + "  Activity: " + " Duration:  " + test);
-                        if(test!=0){
-                            db.updateSteps(test, date);
-                        }
-                        readDataFromDB();
-                        adapter.notifyDataSetChanged();
-
-
+            final int test = (int) steps;
+            final Date dateTest = date;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    String date = new SimpleDateFormat("dd-MM-yyyy").format(dateTest);
+                    Log.i("GarethTest", "Start : " + date + "  Activity: " + " Duration:  " + test);
+                    if (test != 0) {
+                        db.updateSteps(test, date);
                     }
-                });
-            }
+                    readDataFromDB();
+                    adapter.notifyDataSetChanged();
 
+
+                }
+            });
+        }
+
+    }
+
+    public void checkTrophies(String date) {
+        TrophyModel currentTrophies = db.readTrophies();
+        if (currentTrophies.getUsage().equals("N")) {
+            if (db.getStreak() >= 2) {
+                db.updateTrophies("Usage", "B");
+            }
+        } else if (currentTrophies.getUsage().equals("B")) {
+            if (db.getStreak() >= 7) {
+                db.updateTrophies("Usage", "S");
+            }
+        } else if (currentTrophies.getUsage().equals("S")) {
+            if (db.getStreak() >= 14) {
+                db.updateTrophies("Usage", "G");
+            }
+        }
+
+        if (currentTrophies.getEverything().equals("N")) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+            } catch (Exception e) {
+                Log.e("Error", e.toString());
+            }
+            boolean result = true;
+            for (int i = 0; i < 7; i++) {
+                String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                DataModel data = db.readData(updatedDate);
+                if (data == null) {
+                    result = false;
+                    break;
+                } else if (data.getSteps() < 5000) {
+                    result = false;
+                    break;
+                } else if (data.getActivityTime() < 10) {
+                    result = false;
+                    break;
+                } else if (data.getFruitAndVeg() < 2) {
+                    result = false;
+                    break;
+                } else if (data.getWater() < 4) {
+                    result = false;
+                    break;
+                }
+                cal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            if (result) {
+                db.updateTrophies("Everything", "B");
+            }
+        } else if (currentTrophies.getEverything().equals("B")) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+            } catch (Exception e) {
+                Log.e("Error", e.toString());
+            }
+            boolean result = true;
+            for (int i = 0; i < 7; i++) {
+                String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                DataModel data = db.readData(updatedDate);
+                if (data == null) {
+                    result = false;
+                    break;
+                } else if (data.getSteps() < 7500) {
+                    result = false;
+                    break;
+                } else if (data.getActivityTime() < 20) {
+                    result = false;
+                    break;
+                } else if (data.getFruitAndVeg() < 4) {
+                    result = false;
+                    break;
+                } else if (data.getWater() < 6) {
+                    result = false;
+                    break;
+                }
+                cal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            if (result) {
+                db.updateTrophies("Everything", "S");
+            }
+        } else if (currentTrophies.getEverything().equals("S")) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+            } catch (Exception e) {
+                Log.e("Error", e.toString());
+            }
+            boolean result = true;
+            for (int i = 0; i < 7; i++) {
+                String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                DataModel data = db.readData(updatedDate);
+                if (data == null) {
+                    result = false;
+                    break;
+                } else if (data.getSteps() < 10000) {
+                    result = false;
+                    break;
+                } else if (data.getActivityTime() < 30) {
+                    result = false;
+                    break;
+                } else if (data.getFruitAndVeg() < 5) {
+                    result = false;
+                    break;
+                } else if (data.getWater() < 8) {
+                    result = false;
+                    break;
+                }
+                cal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            if (result) {
+                db.updateTrophies("Everything", "G");
+            }
+        }
+
+        if (currentTrophies.getSteps().equals("N")) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+            } catch (Exception e) {
+                Log.e("Error", e.toString());
+            }
+            boolean result = true;
+            for (int i = 0; i < 7; i++) {
+                String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                DataModel data = db.readData(updatedDate);
+                if (data == null) {
+                    result = false;
+                    break;
+                } else if (data.getSteps() < 5000) {
+                    result = false;
+                    break;
+                }
+                cal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            if (result) {
+                db.updateTrophies("Steps", "B");
+            }
+        } else if (currentTrophies.getSteps().equals("B")) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+            } catch (Exception e) {
+                Log.e("Error", e.toString());
+            }
+            boolean result = true;
+            for (int i = 0; i < 7; i++) {
+                String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                DataModel data = db.readData(updatedDate);
+                if (data.getSteps() < 7500) {
+                    result = false;
+                    break;
+                }
+                cal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            if (result) {
+                db.updateTrophies("Steps", "S");
+            }
+        } else if (currentTrophies.getSteps().equals("S")) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+            } catch (Exception e) {
+                Log.e("Error", e.toString());
+            }
+            boolean result = true;
+            for (int i = 0; i < 7; i++) {
+                String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                DataModel data = db.readData(updatedDate);
+                if (data == null) {
+                    result = false;
+                    break;
+                } else if (data.getSteps() < 10000) {
+                    result = false;
+                    break;
+                }
+                cal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            if (result) {
+                db.updateTrophies("Steps", "G");
+            }
+        }
+
+        if (currentTrophies.getActive().equals("N")) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+            } catch (Exception e) {
+                Log.e("Error", e.toString());
+            }
+            boolean result = true;
+            for (int i = 0; i < 7; i++) {
+                String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                DataModel data = db.readData(updatedDate);
+                if (data == null) {
+                    result = false;
+                    break;
+                } else if (data.getActivityTime() < 10) {
+                    result = false;
+                    break;
+                }
+                cal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            if (result) {
+                db.updateTrophies("Active", "B");
+            }
+        } else if (currentTrophies.getActive().equals("B")) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+            } catch (Exception e) {
+                Log.e("Error", e.toString());
+            }
+            boolean result = true;
+            for (int i = 0; i < 7; i++) {
+                String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                DataModel data = db.readData(updatedDate);
+                if (data == null) {
+                    result = false;
+                    break;
+                } else if (data.getActivityTime() < 20) {
+                    result = false;
+                    break;
+                }
+                cal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            if (result) {
+                db.updateTrophies("Active", "S");
+            }
+        } else if (currentTrophies.getActive().equals("S")) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+            } catch (Exception e) {
+                Log.e("Error", e.toString());
+            }
+            boolean result = true;
+            for (int i = 0; i < 7; i++) {
+                String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                DataModel data = db.readData(updatedDate);
+                if (data == null) {
+                    result = false;
+                    break;
+                } else if (data.getActivityTime() < 30) {
+                    result = false;
+                    break;
+                }
+                cal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            if (result) {
+                db.updateTrophies("Active", "G");
+            }
+        }
+
+        if (currentTrophies.getFruit().equals("N")) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+            } catch (Exception e) {
+                Log.e("Error", e.toString());
+            }
+            boolean result = true;
+            for (int i = 0; i < 7; i++) {
+                String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                DataModel data = db.readData(updatedDate);
+                if (data == null) {
+                    result = false;
+                    break;
+                } else if (data.getActivityTime() < 2) {
+                    result = false;
+                    break;
+                }
+                cal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            if (result) {
+                db.updateTrophies("Fruit", "B");
+            }
+        } else if (currentTrophies.getFruit().equals("B")) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+            } catch (Exception e) {
+                Log.e("Error", e.toString());
+            }
+            boolean result = true;
+            for (int i = 0; i < 7; i++) {
+                String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                DataModel data = db.readData(updatedDate);
+                if (data == null) {
+                    result = false;
+                    break;
+                } else if (data.getActivityTime() < 4) {
+                    result = false;
+                    break;
+                }
+                cal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            if (result) {
+                db.updateTrophies("Fruit", "S");
+            }
+        } else if (currentTrophies.getFruit().equals("S")) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+            } catch (Exception e) {
+                Log.e("Error", e.toString());
+            }
+            boolean result = true;
+            for (int i = 0; i < 7; i++) {
+                String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                DataModel data = db.readData(updatedDate);
+                if (data == null) {
+                    result = false;
+                    break;
+                } else if (data.getActivityTime() < 5) {
+                    result = false;
+                    break;
+                }
+                cal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            if (result) {
+                db.updateTrophies("Fruit", "G");
+            }
+        }
+
+        if (currentTrophies.getWater().equals("N")) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+            } catch (Exception e) {
+                Log.e("Error", e.toString());
+            }
+            boolean result = true;
+            for (int i = 0; i < 7; i++) {
+                String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                DataModel data = db.readData(updatedDate);
+                if (data == null) {
+                    result = false;
+                    break;
+                } else if (data.getActivityTime() < 4) {
+                    result = false;
+                    break;
+                }
+                cal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            if (result) {
+                db.updateTrophies("Water", "B");
+            }
+        } else if (currentTrophies.getWater().equals("B")) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+            } catch (Exception e) {
+                Log.e("Error", e.toString());
+            }
+            boolean result = true;
+            for (int i = 0; i < 7; i++) {
+                String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                DataModel data = db.readData(updatedDate);
+                if (data == null) {
+                    result = false;
+                    break;
+                } else if (data.getActivityTime() < 6) {
+                    result = false;
+                    break;
+                }
+                cal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            if (result) {
+                db.updateTrophies("Water", "S");
+            }
+        } else if (currentTrophies.getWater().equals("S")) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+            } catch (Exception e) {
+                Log.e("Error", e.toString());
+            }
+            boolean result = true;
+            for (int i = 0; i < 7; i++) {
+                String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                DataModel data = db.readData(updatedDate);
+
+                if (data == null) {
+                    result = false;
+                    break;
+                } else if (data.getActivityTime() < 8) {
+                    result = false;
+                    break;
+                }
+                cal.add(Calendar.DAY_OF_YEAR, -1);
+            }
+            if (result) {
+                db.updateTrophies("Water", "G");
+            }
         }
     }
+}

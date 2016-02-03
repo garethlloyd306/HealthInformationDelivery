@@ -5,185 +5,61 @@ package honoursproject.garethlloyd.healthinformationdelivery;
  */
 public class TrophyModel {
 
-    private int one;
-    private int two;
-    private int week;
-    private int month;
-    private int gOne;
-    private int gTwo;
-    private int gWeek;
-    private int gMonth;
-    private int gSteps;
-    private int sSteps;
-    private int bSteps;
-    private int gWater;
-    private int sWater;
-    private int bWater;
-    private int gFruit;
-    private int sFruit;
-    private int bFruit;
-    private int gActive;
-    private int sActive;
-    private int bActive;
+    private String usage;
+    private String everything;
+    private String steps;
+    private String water;
+    private String fruit;
+    private String active;
 
-    public int getOne() {
-        return one;
+    public String getUsage() {
+        return usage;
     }
 
-    public void setOne(int one) {
-        this.one = one;
+    public void setUsage(String usage) {
+        this.usage = usage;
     }
 
-    public int getTwo() {
-        return two;
+    public String getEverything() {
+        return everything;
     }
 
-    public void setTwo(int two) {
-        this.two = two;
+    public void setEverything(String everything) {
+        this.everything = everything;
     }
 
-    public int getWeek() {
-        return week;
+    public String getSteps() {
+        return steps;
     }
 
-    public void setWeek(int week) {
-        this.week = week;
+    public void setSteps(String steps) {
+        this.steps = steps;
     }
 
-    public int getMonth() {
-        return month;
+    public String getWater() {
+        return water;
     }
 
-    public void setMonth(int month) {
-        this.month = month;
+    public void setWater(String water) {
+        this.water = water;
     }
 
-    public int getgOne() {
-        return gOne;
+    public String getFruit() {
+        return fruit;
     }
 
-    public void setgOne(int gOne) {
-        this.gOne = gOne;
+    public void setFruit(String fruit) {
+        this.fruit = fruit;
     }
 
-    public int getgTwo() {
-        return gTwo;
+    public String getActive() {
+        return active;
     }
 
-    public void setgTwo(int gTwo) {
-        this.gTwo = gTwo;
+    public void setActive(String active) {
+        this.active = active;
     }
 
-    public int getgWeek() {
-        return gWeek;
-    }
 
-    public void setgWeek(int gWeek) {
-        this.gWeek = gWeek;
-    }
-
-    public int getgMonth() {
-        return gMonth;
-    }
-
-    public void setgMonth(int gMonth) {
-        this.gMonth = gMonth;
-    }
-
-    public int getgSteps() {
-        return gSteps;
-    }
-
-    public void setgSteps(int gSteps) {
-        this.gSteps = gSteps;
-    }
-
-    public int getsSteps() {
-        return sSteps;
-    }
-
-    public void setsSteps(int sSteps) {
-        this.sSteps = sSteps;
-    }
-
-    public int getbSteps() {
-        return bSteps;
-    }
-
-    public void setbSteps(int bSteps) {
-        this.bSteps = bSteps;
-    }
-
-    public int getgWater() {
-        return gWater;
-    }
-
-    public void setgWater(int gWater) {
-        this.gWater = gWater;
-    }
-
-    public int getsWater() {
-        return sWater;
-    }
-
-    public void setsWater(int sWater) {
-        this.sWater = sWater;
-    }
-
-    public int getbWater() {
-        return bWater;
-    }
-
-    public void setbWater(int bWater) {
-        this.bWater = bWater;
-    }
-
-    public int getgFruit() {
-        return gFruit;
-    }
-
-    public void setgFruit(int gFruit) {
-        this.gFruit = gFruit;
-    }
-
-    public int getsFruit() {
-        return sFruit;
-    }
-
-    public void setsFruit(int sFruit) {
-        this.sFruit = sFruit;
-    }
-
-    public int getbFruit() {
-        return bFruit;
-    }
-
-    public void setbFruit(int bFruit) {
-        this.bFruit = bFruit;
-    }
-
-    public int getgActive() {
-        return gActive;
-    }
-
-    public void setgActive(int gActive) {
-        this.gActive = gActive;
-    }
-
-    public int getsActive() {
-        return sActive;
-    }
-
-    public void setsActive(int sActive) {
-        this.sActive = sActive;
-    }
-
-    public int getbActive() {
-        return bActive;
-    }
-
-    public void setbActive(int bActive) {
-        this.bActive = bActive;
-    }
 
 }

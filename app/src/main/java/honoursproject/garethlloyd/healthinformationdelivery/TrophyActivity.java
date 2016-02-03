@@ -1,10 +1,16 @@
 package honoursproject.garethlloyd.healthinformationdelivery;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class TrophyActivity extends AppCompatActivity {
@@ -12,6 +18,13 @@ public class TrophyActivity extends AppCompatActivity {
     DatabaseHandler db;
     ImageView[] trophies;
     TrophyModel results;
+    ImageView trophyUsage;
+    ImageView trophyEverything;
+    ImageView trophySteps;
+    ImageView trophyWater;
+    ImageView trophyFruit;
+    ImageView trophyActivity;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,124 +54,12 @@ public class TrophyActivity extends AppCompatActivity {
         trophies[17] = (ImageView) findViewById(R.id.trophy18);
         trophies[18] = (ImageView) findViewById(R.id.trophy19);
         trophies[19] = (ImageView) findViewById(R.id.trophy20);
-
-        if (results.getOne() == 0) {
-            trophies[0].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[0].setVisibility(View.VISIBLE);
-        }
-        if (results.getTwo() == 0) {
-            trophies[1].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[1].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getWeek() == 0) {
-            trophies[2].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[2].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getMonth() == 0) {
-            trophies[3].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[3].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getgOne() == 0) {
-            trophies[4].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[4].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getgTwo() == 0) {
-            trophies[5].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[5].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getgWeek() == 0) {
-            trophies[6].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[6].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getgMonth() == 0) {
-            trophies[7].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[7].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getgSteps() == 0) {
-            trophies[8].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[8].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getsSteps() == 0) {
-            trophies[9].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[9].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getbSteps() == 0) {
-            trophies[10].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[10].setVisibility(View.VISIBLE);
-        }
-        if (results.getgWater() == 0) {
-            trophies[11].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[11].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getsWater() == 0) {
-            trophies[12].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[12].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getbWater() == 0) {
-            trophies[13].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[13].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getgActive() == 0) {
-            trophies[14].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[14].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getsSteps() == 0) {
-            trophies[15].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[15].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getbSteps() == 0) {
-            trophies[16].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[16].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getgFruit() == 0) {
-            trophies[17].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[17].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getsFruit() == 0) {
-            trophies[18].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[18].setVisibility(View.VISIBLE);
-        }
-
-        if (results.getbFruit() == 0) {
-            trophies[19].setVisibility(View.INVISIBLE);
-        } else {
-            trophies[19].setVisibility(View.VISIBLE);
-        }
+        trophyUsage = (ImageView) findViewById(R.id.trophyUsage);
+        trophyEverything = (ImageView) findViewById(R.id.trophyEverything);
+        trophySteps = (ImageView) findViewById(R.id.trophySteps);
+        trophyFruit = (ImageView) findViewById(R.id.trophyFruit);
+        trophyActivity = (ImageView) findViewById(R.id.trophyActive);
+        trophyWater = (ImageView) findViewById(R.id.trophyWater);
 
         trophies[0].setOnClickListener(new View.OnClickListener() {
             @Override
@@ -166,5 +67,94 @@ public class TrophyActivity extends AppCompatActivity {
                 Toast.makeText(v.getContext(),"Use the app for One Day!", Toast.LENGTH_LONG).show();
             }
         });
+
+        if(results.getUsage().equals("B")){
+            trophyUsage.setImageResource(R.drawable.bronze_trophy);
+        }else if(results.getUsage().equals("S")){
+            trophyUsage.setImageResource(R.drawable.silver_trophy);
+        }else if(results.getUsage().equals("G")){
+            trophyUsage.setImageResource(R.drawable.trophy);
+        }else if(results.getUsage().equals("N")){
+            trophyUsage.setImageResource(R.drawable.no_trophy);
+        }
+
+        if(results.getEverything().equals("B")){
+            trophyEverything.setImageResource(R.drawable.bronze_trophy);
+        }else if(results.getEverything().equals("S")){
+            trophyEverything.setImageResource(R.drawable.silver_trophy);
+        }else if(results.getEverything().equals("G")){
+            trophyEverything.setImageResource(R.drawable.trophy);
+        }else if(results.getEverything().equals("N")){
+            trophyEverything.setImageResource(R.drawable.no_trophy);
+        }
+
+        if(results.getSteps().equals("B")){
+            trophySteps.setImageResource(R.drawable.bronze_trophy);
+        }else if(results.getSteps().equals("S")){
+            trophySteps.setImageResource(R.drawable.silver_trophy);
+        }else if(results.getSteps().equals("G")){
+            trophySteps.setImageResource(R.drawable.trophy);
+        }else if(results.getSteps().equals("N")){
+            trophySteps.setImageResource(R.drawable.no_trophy);
+        }
+
+        if(results.getWater().equals("B")){
+            trophyWater.setImageResource(R.drawable.bronze_trophy);
+        }else if(results.getWater().equals("S")){
+            trophyWater.setImageResource(R.drawable.silver_trophy);
+        }else if(results.getWater().equals("G")){
+            trophyWater.setImageResource(R.drawable.trophy);
+        }else if(results.getWater().equals("N")){
+            trophyWater.setImageResource(R.drawable.no_trophy);
+        }
+
+        if(results.getFruit().equals("B")){
+            trophyFruit.setImageResource(R.drawable.bronze_trophy);
+        }else if(results.getFruit().equals("S")){
+            trophyFruit.setImageResource(R.drawable.silver_trophy);
+        }else if(results.getFruit().equals("G")){
+            trophyFruit.setImageResource(R.drawable.trophy);
+        }else if(results.getFruit().equals("N")){
+            trophyFruit.setImageResource(R.drawable.no_trophy);
+        }
+
+        if(results.getActive().equals("B")){
+            trophyActivity.setImageResource(R.drawable.bronze_trophy);
+        }else if(results.getActive().equals("S")){
+            trophyActivity.setImageResource(R.drawable.silver_trophy);
+        }else if(results.getActive().equals("G")){
+            trophyActivity.setImageResource(R.drawable.trophy);
+        }else if(results.getActive().equals("N")){
+            trophyActivity.setImageResource(R.drawable.no_trophy);
+        }
+
+        trophyUsage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(TrophyActivity.this);
+                LayoutInflater inflater = (LayoutInflater) TrophyActivity.this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                View view1 = inflater.inflate(R.layout.custom_dialog, null);
+                builder.setView(view1);
+                TextView title = new TextView(TrophyActivity.this);
+                title.setText("Well Done!");
+                title.setGravity(Gravity.CENTER);
+                title.setTextColor(Color.BLACK);
+                title.setTextSize(20);
+                title.setPadding(10, 10, 10, 10);
+                builder.setCustomTitle(title);
+                TextView text1 = (TextView) view1.findViewById(R.id.textAward);
+                ImageView imageAward = (ImageView) view1.findViewById(R.id.image);
+                Button close = (Button) view1.findViewById(R.id.close);
+                final AlertDialog dialog = builder.create();
+                close.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+            }
+        });
+
+
+        }
     }
-}

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.speech.RecognitionService;
 import android.util.Log;
 
 import java.text.SimpleDateFormat;
@@ -29,7 +30,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     // Contacts Table Columns names
     private static final String KEY_DATE = "date";
     private static final String KEY_STEPS = "steps";
-    private static final String KEY_FRUIT = "fruit";
+    private static final String KEY_FRUIT ="fruit";
     private static final String KEY_WATER = "water";
     private static final String KEY_ACTIVITY = "activity";
 
@@ -38,26 +39,9 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     private static final String KEY_STREAK ="days_streak";
     private static final String KEY_ID ="userid";
 
-    private static final String KEY_ONE ="one_day";
-    private static final String KEY_TWO ="two_day";
-    private static final String KEY_WEEK ="week";
-    private static final String KEY_MONTH ="month";
-    private static final String KEY_GDAY ="gold_day";
-    private static final String KEY_GTWO ="gold_two_day";
-    private static final String KEY_GWEEK ="gold_week";
-    private static final String KEY_GMONTH ="gold_month";
-    private static final String KEY_GSTEP ="gold_step";
-    private static final String KEY_SSTEP ="silver_step";
-    private static final String KEY_BSTEP ="bronze_step";
-    private static final String KEY_GWATER ="gold_water";
-    private static final String KEY_SWATER ="silver_water";
-    private static final String KEY_BWATER ="bronze_water";
-    private static final String KEY_GFRUIT ="gold_fruit";
-    private static final String KEY_SFRUIT ="silver_fruit";
-    private static final String KEY_BFRUIT ="bronze_fruit";
-    private static final String KEY_GACTIVE ="gold_active";
-    private static final String KEY_SACTIVE ="silver_active";
-    private static final String KEY_BACTIVE ="bronze_active";
+    private static final String KEY_USAGE ="usage";
+    private static final String KEY_EVERYTHING ="everything";
+
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -78,17 +62,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.execSQL(CREATE_USERS_TABLE);
 
         String CREATE_TROPHIES_TABLE = "CREATE TABLE " + TABLE_TROPHIES+ "("
-                + KEY_ID + " TEXT PRIMARY KEY," + KEY_ONE+ " INTEGER,"
-                + KEY_TWO + " INTEGER," +  KEY_WEEK + " INTEGER,"
-                + KEY_MONTH + " INTEGER," +  KEY_GDAY+ " INTEGER,"
-                + KEY_GTWO + " INTEGER," +  KEY_GWEEK + " INTEGER,"
-                + KEY_GMONTH + " INTEGER,"  +   KEY_GSTEP+ " INTEGER,"
-                + KEY_SSTEP + " INTEGER," +  KEY_BSTEP + " INTEGER,"
-                + KEY_GFRUIT + " INTEGER," +   KEY_SFRUIT+ " INTEGER,"
-                + KEY_BFRUIT + " INTEGER," +  KEY_GWATER + " INTEGER,"
-                + KEY_SWATER + " INTEGER," +  KEY_BWATER+ " INTEGER,"
-                + KEY_GACTIVE + " INTEGER," +  KEY_SACTIVE + " INTEGER,"
-                + KEY_BACTIVE + " INTEGER)";
+                + KEY_ID + " TEXT PRIMARY KEY," + KEY_USAGE+ " TEXT,"
+                + KEY_EVERYTHING + " TEXT," +  KEY_STEPS + " TEXT,"
+                + KEY_ACTIVITY + " TEXT," +  KEY_WATER+ " TEXT,"
+                + KEY_FRUIT + " TEXT)" ;
 
         Log.i("garethtest", CREATE_TROPHIES_TABLE);
         db.execSQL(CREATE_TROPHIES_TABLE);
@@ -187,13 +164,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                         KEY_STEPS, KEY_WATER, KEY_FRUIT, KEY_ACTIVITY}, KEY_DATE + "=?",
                 new String[]{date}, null, null, null, null);
         if (cursor != null) {
-            cursor.moveToFirst();
-            DataModel data = new DataModel();
-            data.setSteps(cursor.getInt(cursor.getColumnIndex(KEY_STEPS)));
-            data.setWater(cursor.getInt(cursor.getColumnIndex(KEY_WATER)));
-            data.setFruitAndVeg(cursor.getInt(cursor.getColumnIndex(KEY_FRUIT)));
-            data.setActivityTime(cursor.getInt(cursor.getColumnIndex(KEY_ACTIVITY)));
-            return data;
+            if(cursor.moveToFirst()) {
+                DataModel data = new DataModel();
+                data.setSteps(cursor.getInt(cursor.getColumnIndex(KEY_STEPS)));
+                data.setWater(cursor.getInt(cursor.getColumnIndex(KEY_WATER)));
+                data.setFruitAndVeg(cursor.getInt(cursor.getColumnIndex(KEY_FRUIT)));
+                data.setActivityTime(cursor.getInt(cursor.getColumnIndex(KEY_ACTIVITY)));
+                return data;
+            }
         }
         return null;
     }
@@ -216,13 +194,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DAY_OF_YEAR, -1);
             String yesterday = new SimpleDateFormat("dd-MM-yyyy").format(calendar.getTime());
-            if(lastDate==yesterday){
+            if(lastDate.equals(yesterday)){
                 streak++;
             }else{
                 streak=1;
             }
-            values.put(KEY_LAST,yesterday);
-            values.put(KEY_STREAK,streak);
+            values.put(KEY_LAST, yesterday);
+            values.put(KEY_STREAK, streak);
           int test = db.update(TABLE_USERS, values, KEY_ID + " = 1" , null);
             Log.i("TestingUpdate", String.valueOf(test));
             cursor.close();
@@ -230,31 +208,29 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
     }
 
+    public int getStreak(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS, null);
+        if (cursor.getCount()!=0) {
+            cursor.moveToFirst();
+            return cursor.getInt(cursor.getColumnIndex(KEY_STREAK));
+        }
+        return 0;
+
+    }
+
+
     public void addTrophies(){
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_TROPHIES, null);
         ContentValues values = new ContentValues();
         if(cursor.getCount() == 0) {
-            values.put(KEY_ONE, 1);
-            values.put(KEY_TWO, 0);
-            values.put(KEY_WEEK, 0);
-            values.put(KEY_MONTH, 0);
-            values.put(KEY_GDAY, 0);
-            values.put(KEY_GTWO, 0);
-            values.put(KEY_GWEEK, 0);
-            values.put(KEY_GMONTH, 0);
-            values.put(KEY_GSTEP, 0);
-            values.put(KEY_SSTEP, 0);
-            values.put(KEY_BSTEP, 0);
-            values.put(KEY_GFRUIT, 0);
-            values.put(KEY_SFRUIT, 0);
-            values.put(KEY_BFRUIT, 0);
-            values.put(KEY_GWATER, 0);
-            values.put(KEY_SWATER, 0);
-            values.put(KEY_BWATER, 0);
-            values.put(KEY_GACTIVE, 0);
-            values.put(KEY_SACTIVE, 0);
-            values.put(KEY_BACTIVE, 0);
+            values.put(KEY_USAGE, "N");
+            values.put(KEY_EVERYTHING, "N");
+            values.put(KEY_STEPS, "N");
+            values.put(KEY_FRUIT, "N");
+            values.put(KEY_WATER, "N");
+            values.put(KEY_ACTIVITY, "N");
             db.insert(TABLE_TROPHIES, null, values);
         }
         cursor.close();
@@ -266,32 +242,40 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor != null) {
             cursor.moveToFirst();
             TrophyModel trophy = new TrophyModel();
-            trophy.setOne(cursor.getInt(cursor.getColumnIndex(KEY_ONE)));
-            trophy.setTwo(cursor.getInt(cursor.getColumnIndex(KEY_TWO)));
-            trophy.setWeek(cursor.getInt(cursor.getColumnIndex(KEY_WEEK)));
-            trophy.setMonth(cursor.getInt(cursor.getColumnIndex(KEY_MONTH)));
-            trophy.setgOne(cursor.getInt(cursor.getColumnIndex(KEY_GDAY)));
-            trophy.setgTwo(cursor.getInt(cursor.getColumnIndex(KEY_GTWO)));
-            trophy.setgWeek(cursor.getInt(cursor.getColumnIndex(KEY_GWEEK)));
-            trophy.setgMonth(cursor.getInt(cursor.getColumnIndex(KEY_GMONTH)));
-            trophy.setgSteps(cursor.getInt(cursor.getColumnIndex(KEY_GSTEP)));
-            trophy.setgWater(cursor.getInt(cursor.getColumnIndex(KEY_GWATER)));
-            trophy.setgFruit(cursor.getInt(cursor.getColumnIndex(KEY_GFRUIT)));
-            trophy.setgActive(cursor.getInt(cursor.getColumnIndex(KEY_GACTIVE)));
-            trophy.setsSteps(cursor.getInt(cursor.getColumnIndex(KEY_SSTEP)));
-            trophy.setsWater(cursor.getInt(cursor.getColumnIndex(KEY_SWATER)));
-            trophy.setsFruit(cursor.getInt(cursor.getColumnIndex(KEY_SFRUIT)));
-            trophy.setsActive(cursor.getInt(cursor.getColumnIndex(KEY_SACTIVE)));
-            trophy.setbSteps(cursor.getInt(cursor.getColumnIndex(KEY_BSTEP)));
-            trophy.setbWater(cursor.getInt(cursor.getColumnIndex(KEY_BWATER)));
-            trophy.setbFruit(cursor.getInt(cursor.getColumnIndex(KEY_BFRUIT)));
-            trophy.setbActive(cursor.getInt(cursor.getColumnIndex(KEY_BACTIVE)));
+            trophy.setUsage(cursor.getString(cursor.getColumnIndex(KEY_USAGE)));
+            trophy.setEverything(cursor.getString(cursor.getColumnIndex(KEY_EVERYTHING)));
+            trophy.setSteps(cursor.getString(cursor.getColumnIndex(KEY_STEPS)));
+            trophy.setWater(cursor.getString(cursor.getColumnIndex(KEY_WATER)));
+            trophy.setFruit(cursor.getString(cursor.getColumnIndex(KEY_FRUIT)));
+            trophy.setActive(cursor.getString(cursor.getColumnIndex(KEY_ACTIVITY)));
             return trophy;
         }
         return null;
     }
 
-    public void updateTrophies(int trophy, int value){
+    public void updateTrophies(String trophy, String result){
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_USERS, null);
+        ContentValues values = new ContentValues();
+        if(trophy.equals("Usage")){
+            values.put(KEY_USAGE, result);
+            db.update(TABLE_TROPHIES, values, null, null);
+        }else if(trophy.equals("Everything")){
+            values.put(KEY_EVERYTHING,result);
+            db.update(TABLE_TROPHIES, values, null,null);
+        }else if(trophy.equals("Steps")){
+            values.put(KEY_STEPS, result);
+            db.update(TABLE_TROPHIES, values, null,null);
+        }else if(trophy.equals("Water")){
+            values.put(KEY_WATER, result);
+            db.update(TABLE_TROPHIES, values, null, null);
+        }else if(trophy.equals("Fruit")){
+            values.put(KEY_FRUIT, result);
+            db.update(TABLE_TROPHIES, values, null, null);
+        }else if(trophy.equals("Active")){
+            values.put(KEY_ACTIVITY,result);
+            db.update(TABLE_TROPHIES, values, null,null);
+        }
 
     }
 
