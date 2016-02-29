@@ -25,7 +25,7 @@ public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         DatabaseHandler db = new DatabaseHandler(context);
-        if (!db.rowExists(new SimpleDateFormat("dd-MM-yyyy").format(new Date()))) {
+       if (!db.rowExists(new SimpleDateFormat("dd-MM-yyyy").format(new Date()))) {
             Random r = new Random();
             int i = r.nextInt(3);
             NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
@@ -61,6 +61,20 @@ public class AlarmReceiver extends BroadcastReceiver {
                     .setNumber(++numMessages);
             // Because the ID remains unchanged, the existing notification is
             // updated.
+
+            Intent resultIntent = new Intent(context, MainActivity.class);
+
+// Because clicking the notification opens a new ("special") activity, there's
+// no need to create an artificial back stack.
+            PendingIntent resultPendingIntent =
+                    PendingIntent.getActivity(
+                            context,
+                            0,
+                            resultIntent,
+                            PendingIntent.FLAG_UPDATE_CURRENT
+                    );
+
+            mNotifyBuilder.setContentIntent(resultPendingIntent);
             notificationManager.notify(
                     notifyID,
                     mNotifyBuilder.build());

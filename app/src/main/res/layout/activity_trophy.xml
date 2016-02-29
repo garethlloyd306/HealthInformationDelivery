@@ -23,11 +23,12 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
 
     <HorizontalScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="80dp"
         android:layout_below="@id/title"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="50dp"
-        android:id="@+id/scrollView">
+        android:id="@+id/scrollView"
+        android:background="@drawable/border">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -35,28 +36,28 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
 
             <ImageView
                 android:id="@+id/trophy"
-                android:layout_width="70dp"                 
-                android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_below="@id/title"
                 android:layout_marginTop="20dp"
-                android:src="@drawable/trophy" />
+                android:src="@drawable/bronze_trophy" />
 
 
             <ImageView
                 android:id="@+id/trophy2"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_below="@id/title"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
                 android:layout_toRightOf="@id/trophy"
-                android:src="@drawable/trophy" />
+                android:src="@drawable/silver_trophy" />
 
             <ImageView
                 android:id="@+id/trophy3"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_below="@id/title"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
@@ -65,26 +66,27 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
 
             <ImageView
                 android:id="@+id/trophy4"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_below="@id/title"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
                 android:layout_toRightOf="@id/trophy3"
-                android:src="@drawable/trophy" />
+                android:src="@drawable/bronze_trophy" />
 
             <ImageView
                 android:id="@+id/trophy5"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
+                android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
-                android:src="@drawable/trophy" />
+                android:src="@drawable/silver_trophy" />
 
             <ImageView
                 android:id="@+id/trophy6"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
                 android:layout_toRightOf="@id/trophy5"
@@ -92,52 +94,53 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
 
             <ImageView
                 android:id="@+id/trophy7"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
                 android:layout_toRightOf="@id/trophy6"
-                android:src="@drawable/trophy" />
+                android:src="@drawable/bronze_trophy" />
 
             <ImageView
                 android:id="@+id/trophy8"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
                 android:layout_toRightOf="@id/trophy7"
-                android:src="@drawable/trophy" />
+                android:src="@drawable/silver_trophy" />
 
             <ImageView
                 android:id="@+id/trophy9"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
+                android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
                 android:src="@drawable/trophy" />
 
             <ImageView
                 android:id="@+id/trophy10"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
                 android:layout_toRightOf="@id/trophy9"
-                android:src="@drawable/trophy" />
+                android:src="@drawable/bronze_trophy" />
 
             <ImageView
                 android:id="@+id/trophy11"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
                 android:layout_toRightOf="@id/trophy10"
-                android:src="@drawable/trophy" />
+                android:src="@drawable/silver_trophy" />
 
             <ImageView
                 android:id="@+id/trophy12"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
                 android:layout_toRightOf="@id/trophy11"
@@ -145,61 +148,28 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
 
             <ImageView
                 android:id="@+id/trophy13"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
                 android:layout_toRightOf="@id/trophy12"
-                android:src="@drawable/trophy" />
+                android:src="@drawable/bronze_trophy" />
 
-            <ImageView
-                android:id="@+id/trophy17"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
-                android:layout_alignParentStart="true"
-                android:layout_marginTop="20dp"
-                android:src="@drawable/trophy" />
 
-            <ImageView
-                android:id="@+id/trophy18"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
-                android:layout_marginLeft="30dp"
-                android:layout_marginTop="20dp"
-                android:layout_toRightOf="@id/trophy17"
-                android:src="@drawable/trophy" />
-
-            <ImageView
-                android:id="@+id/trophy19"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
-                android:layout_marginLeft="30dp"
-                android:layout_marginTop="20dp"
-                android:layout_toRightOf="@id/trophy18"
-                android:src="@drawable/trophy" />
-
-            <ImageView
-                android:id="@+id/trophy20"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
-                android:layout_marginLeft="30dp"
-                android:layout_marginTop="20dp"
-                android:layout_toRightOf="@id/trophy19"
-                android:src="@drawable/trophy" />
 
             <ImageView
                 android:id="@+id/trophy14"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
                 android:layout_toRightOf="@id/trophy13"
-                android:src="@drawable/trophy" />
+                android:src="@drawable/silver_trophy" />
 
             <ImageView
                 android:id="@+id/trophy15"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
                 android:layout_toRightOf="@id/trophy14"
@@ -207,11 +177,29 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
 
             <ImageView
                 android:id="@+id/trophy16"
-                   android:layout_width="70dp"                 
-                   android:layout_height="70dp"                 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_marginLeft="30dp"
                 android:layout_marginTop="20dp"
                 android:layout_toRightOf="@id/trophy15"
+                android:src="@drawable/bronze_trophy" />
+
+            <ImageView
+                android:id="@+id/trophy17"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="30dp"
+                android:layout_marginTop="20dp"
+                android:src="@drawable/silver_trophy" />
+
+            <ImageView
+                android:id="@+id/trophy18"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="30dp"
+                android:layout_marginTop="20dp"
+                android:layout_toRightOf="@id/trophy17"
                 android:src="@drawable/trophy" />
 
 
@@ -226,7 +214,7 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
     android:layout_width="90dp"
     android:layout_height="90dp"
     android:layout_below="@id/scrollView"
-    android:layout_marginTop="80dp"
+    android:layout_marginTop="60dp"
         android:layout_marginLeft="10dp"
     android:src="@drawable/trophy" />
 
@@ -236,7 +224,7 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
         android:layout_height="90dp"
         android:layout_below="@id/scrollView"
         android:layout_toRightOf="@id/trophyUsage"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="60dp"
         android:layout_marginLeft="20dp"
         android:src="@drawable/trophy" />
 
@@ -247,7 +235,7 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
         android:layout_below="@id/scrollView"
         android:layout_toRightOf="@id/trophyEverything"
         android:layout_marginLeft="20dp"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="60dp"
         android:src="@drawable/trophy" />
 
     <TextView
@@ -348,6 +336,14 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
         android:text="Fruit and Veg"
         android:textAlignment="center"
         android:textSize="12sp"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Home"
+        android:id="@+id/buttonHome"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 
 
 

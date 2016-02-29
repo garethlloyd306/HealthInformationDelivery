@@ -20,6 +20,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -103,6 +104,7 @@ public class MainActivity extends AppCompatActivity {
             db.addHealthData(data);
         }
         db.readData(date);
+        lastActive = db.updateLastActive(date);
         buildFitnessClient();
         readDataFromDB();
         AlarmManager alarmMgr;
@@ -117,8 +119,6 @@ public class MainActivity extends AppCompatActivity {
         alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
                 AlarmManager.INTERVAL_DAY, alarmIntent);
         SAMPLE_SESSION_NAME = "Time";
-
-        lastActive = db.updateLastActive(date);
         db.addTrophies();
 
 
@@ -182,6 +182,7 @@ public class MainActivity extends AppCompatActivity {
                                     // Show the localized error dialog
                                     GooglePlayServicesUtil.getErrorDialog(result.getErrorCode(),
                                             MainActivity.this, 0).show();
+                                    Toast.makeText(MainActivity.this, "Connection Failed, make sure you have internet connection and try again!", Toast.LENGTH_LONG).show();
                                     return;
                                 }
                                 // The failure has a resolution. Resolve it.
@@ -402,45 +403,59 @@ public class MainActivity extends AppCompatActivity {
                 if (view.getTag().toString() == "plusWater") {
                     result = values[1] + 1;
                 } else {
-                    result = values[1] - 1;
+                    if ((values[1] - 1) > 0) {
+                        result = values[1] - 1;
+                    } else {
+                        result = 0;
+                        Toast.makeText(this, "Water can't be a minus value", Toast.LENGTH_SHORT).show();
+                    }
                 }
                 db.updateWater(result, date);
                 readDataFromDB();
                 adapter.notifyDataSetChanged();
-                if (result == 4) {
-                    text1.setText("Bronze Award!");
-                    imageAward.setImageResource(R.drawable.bronze_star);
-                    dialog.show();
-                } else if (result == 6) {
-                    text1.setText("Silver Award!");
-                    imageAward.setImageResource(R.drawable.silver_star);
-                    dialog.show();
-                } else if (result == 8) {
-                    text1.setText("Gold Award!");
-                    imageAward.setImageResource(R.drawable.gold_star);
-                    dialog.show();
+                if (view.getTag().toString() != "minusWater") {
+                    if (result == 4) {
+                        text1.setText("Bronze Award!");
+                        imageAward.setImageResource(R.drawable.bronze_star);
+                        dialog.show();
+                    } else if (result == 6) {
+                        text1.setText("Silver Award!");
+                        imageAward.setImageResource(R.drawable.silver_star);
+                        dialog.show();
+                    } else if (result == 8) {
+                        text1.setText("Gold Award!");
+                        imageAward.setImageResource(R.drawable.gold_star);
+                        dialog.show();
+                    }
                 }
             } else if (view.getTag().toString() == "minusFruit" || view.getTag().toString() == "plusFruit") {
                 if (view.getTag().toString() == "plusFruit") {
                     result = values[2] + 1;
                 } else {
-                    result = values[2] - 1;
+                    if ((values[2] - 1) > 0) {
+                        result = values[2] - 1;
+                    } else {
+                        result = 0;
+                        Toast.makeText(this, "Fruit and Veg can't be a minus value", Toast.LENGTH_SHORT).show();
+                    }
                 }
                 db.updateFruit(result, date);
                 readDataFromDB();
                 adapter.notifyDataSetChanged();
-                if (result == 2) {
-                    text1.setText("Bronze Award!");
-                    imageAward.setImageResource(R.drawable.bronze_star);
-                    dialog.show();
-                } else if (result == 4) {
-                    text1.setText("Silver Award!");
-                    imageAward.setImageResource(R.drawable.silver_star);
-                    dialog.show();
-                } else if (result == 5) {
-                    text1.setText("Gold Award!");
-                    imageAward.setImageResource(R.drawable.gold_star);
-                    dialog.show();
+                if (view.getTag().toString() != "minusFruit") {
+                    if (result == 2) {
+                        text1.setText("Bronze Award!");
+                        imageAward.setImageResource(R.drawable.bronze_star);
+                        dialog.show();
+                    } else if (result == 4) {
+                        text1.setText("Silver Award!");
+                        imageAward.setImageResource(R.drawable.silver_star);
+                        dialog.show();
+                    } else if (result == 5) {
+                        text1.setText("Gold Award!");
+                        imageAward.setImageResource(R.drawable.gold_star);
+                        dialog.show();
+                    }
                 }
             }
         }
@@ -529,6 +544,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void checkTrophies(String date) {
         TrophyModel currentTrophies = db.readTrophies();
+        Log.d("Trophies", "Streak:   " + db.getStreak());
+
         if (currentTrophies.getUsage().equals("N")) {
             if (db.getStreak() >= 2) {
                 db.updateTrophies("Usage", "B");
@@ -617,6 +634,7 @@ public class MainActivity extends AppCompatActivity {
             boolean result = true;
             for (int i = 0; i < 7; i++) {
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                Log.d("Dates", "Everything:  " + updatedDate);
                 DataModel data = db.readData(updatedDate);
                 if (data == null) {
                     result = false;
@@ -694,6 +712,7 @@ public class MainActivity extends AppCompatActivity {
             boolean result = true;
             for (int i = 0; i < 7; i++) {
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                Log.d("Dates", "Steps:  " + updatedDate);
                 DataModel data = db.readData(updatedDate);
                 if (data == null) {
                     result = false;
@@ -719,6 +738,7 @@ public class MainActivity extends AppCompatActivity {
             boolean result = true;
             for (int i = 0; i < 7; i++) {
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                Log.d("Dates", "Active:  " + updatedDate);
                 DataModel data = db.readData(updatedDate);
                 if (data == null) {
                     result = false;
@@ -765,6 +785,7 @@ public class MainActivity extends AppCompatActivity {
             boolean result = true;
             for (int i = 0; i < 7; i++) {
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                Log.d("Dates", "Active:  " + updatedDate);
                 DataModel data = db.readData(updatedDate);
                 if (data == null) {
                     result = false;
@@ -794,7 +815,7 @@ public class MainActivity extends AppCompatActivity {
                 if (data == null) {
                     result = false;
                     break;
-                } else if (data.getActivityTime() < 2) {
+                } else if (data.getFruitAndVeg() < 2) {
                     result = false;
                     break;
                 }
@@ -817,7 +838,7 @@ public class MainActivity extends AppCompatActivity {
                 if (data == null) {
                     result = false;
                     break;
-                } else if (data.getActivityTime() < 4) {
+                } else if (data.getFruitAndVeg() < 4) {
                     result = false;
                     break;
                 }
@@ -840,7 +861,7 @@ public class MainActivity extends AppCompatActivity {
                 if (data == null) {
                     result = false;
                     break;
-                } else if (data.getActivityTime() < 5) {
+                } else if (data.getFruitAndVeg() < 5) {
                     result = false;
                     break;
                 }
@@ -861,11 +882,12 @@ public class MainActivity extends AppCompatActivity {
             boolean result = true;
             for (int i = 0; i < 7; i++) {
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
+                Log.d("Dates", "Water:  " + updatedDate);
                 DataModel data = db.readData(updatedDate);
                 if (data == null) {
                     result = false;
                     break;
-                } else if (data.getActivityTime() < 4) {
+                } else if (data.getWater() < 4) {
                     result = false;
                     break;
                 }
@@ -888,7 +910,7 @@ public class MainActivity extends AppCompatActivity {
                 if (data == null) {
                     result = false;
                     break;
-                } else if (data.getActivityTime() < 6) {
+                } else if (data.getWater() < 6) {
                     result = false;
                     break;
                 }
@@ -912,7 +934,7 @@ public class MainActivity extends AppCompatActivity {
                 if (data == null) {
                     result = false;
                     break;
-                } else if (data.getActivityTime() < 8) {
+                } else if (data.getWater() < 8) {
                     result = false;
                     break;
                 }

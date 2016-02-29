@@ -190,19 +190,23 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }else{
             cursor.moveToFirst();
             int streak = cursor.getInt(cursor.getColumnIndex(KEY_STREAK));
+            Log.i("streak", "StreakDB:  " + streak);
             String lastDate = cursor.getString(cursor.getColumnIndex(KEY_LAST));
             Calendar calendar = Calendar.getInstance();
+            String today = new SimpleDateFormat("dd-MM-yyyy").format(calendar.getTime());
             calendar.add(Calendar.DAY_OF_YEAR, -1);
             String yesterday = new SimpleDateFormat("dd-MM-yyyy").format(calendar.getTime());
             if(lastDate.equals(yesterday)){
+
                 streak++;
-            }else{
+                Log.i("streak", "StreakADD:  " + streak);
+            }else if(!lastDate.equals(today)){
                 streak=1;
+                Log.i("streak", "Streakreset:  " + streak);
             }
-            values.put(KEY_LAST, yesterday);
+            values.put(KEY_LAST, date);
             values.put(KEY_STREAK, streak);
           int test = db.update(TABLE_USERS, values, KEY_ID + " = 1" , null);
-            Log.i("TestingUpdate", String.valueOf(test));
             cursor.close();
             return lastDate;
         }
