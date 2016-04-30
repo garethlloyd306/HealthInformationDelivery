@@ -3,4 +3,17 @@
     <string name="title_activity_result">Results</string>
     <string name="stringEarned">You have earned:</string>
     <string name="title_activity_trophy">TrophyActivity</string>
+    <string name="home">Home</string>
+    <string name="date">date</string>
+    <string name="trophies">Trophies</string>
+    <string name="Usage">Usage</string>
+    <string name="Everything">Everything</string>
+    <string name="Steps">Steps</string>
+    <string name="Water">Water</string>
+    <string name="Active">Active</string>
+    <string name="Fruit">Fruit and Veg</string>
+    <string name="close">Close</string>
+    <string name="earnNext">To earn next award:</string>
+    <string name="stepsHome">Steps : Calculating...</string>
+    <string name="daily">Daily Results</string>
 </resources>

@@ -1,9 +1,10 @@
 package honoursproject.garethlloyd.healthinformationdelivery;
 
 /**
- * Created by admin on 1/23/2016.
+ * Trophy Store - to store the trophies earned by the user
+ * Written by Gareth Lloyd
  */
-public class TrophyModel {
+public class TrophyStore {
 
     private String usage;
     private String everything;
@@ -59,7 +60,6 @@ public class TrophyModel {
     public void setActive(String active) {
         this.active = active;
     }
-
 
 
 }

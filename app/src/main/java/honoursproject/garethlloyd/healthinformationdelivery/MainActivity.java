@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.PagerAdapter;
@@ -26,8 +27,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.fitness.Fitness;
 import com.google.android.gms.fitness.data.Bucket;
@@ -36,31 +35,35 @@ import com.google.android.gms.fitness.data.DataSet;
 import com.google.android.gms.fitness.data.DataType;
 import com.google.android.gms.fitness.data.Field;
 import com.google.android.gms.fitness.request.DataReadRequest;
-import com.google.android.gms.fitness.result.DailyTotalResult;
 import com.google.android.gms.fitness.result.DataReadResult;
 import com.viewpagerindicator.TabPageIndicator;
 import com.viewpagerindicator.UnderlinePageIndicator;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.text.SimpleDateFormat;
 import java.util.concurrent.TimeUnit;
+
+/**
+ * Main Activity class
+ * Written by Gareth Lloyd
+ * This is the home screen of the application - it initialises the view pager
+ * connects with the google fit account, reads results for steps and activity time
+ * Stores results inputted by the user in the database, and pop up dialog when a new reward has been received
+ * <p/>
+ * Used Tutorials from  https://www.developers.google.com/fit/?hl=en
+ * http://www.androidbegin.com/tutorial/android-jake-wharton-viewpager-indicator-tutorial/
+ * http://www.mkyong.com/android/android-custom-dialog-example/
+ */
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView text;
-    private GoogleApiClient mClient = null;
     private static final int REQUEST_OAUTH = 1;
     private static final String AUTH_PENDING = "auth_state_pending";
-    private boolean authInProgress = false;
-    private String TAG = "Log";
+    TextView text;
     ViewPager viewPager;
     PagerAdapter adapter;
     DatabaseHandler db;
-    int steps;
-    int water;
-    int fruit;
-    int time;
     int[] icons;
     int[] values;
     String[] titles;
@@ -69,8 +72,10 @@ public class MainActivity extends AppCompatActivity {
     String[] texts;
     TabPageIndicator mIndicator;
     UnderlinePageIndicator mIndicator1;
-    String SAMPLE_SESSION_NAME;
     String lastActive;
+    private GoogleApiClient mClient = null;
+    private boolean authInProgress = false;
+    private String TAG = "Log";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
         titles = new String[]{"Steps", "Water", " Food", " Activity"};
         targets = new int[]{10000, 8, 5, 30};
         texts = new String[]{"Steps", "Glasses Of Water", "Fruit and Vegetables", "Activity Time"};
+        // Initialising the view pager, setting up the adaptor and setting up the indicators and setting the adapters for these
         viewPager = (ViewPager) findViewById(R.id.pager);
         adapter = new ViewPagerAdapter(MainActivity.this, values, icons, targets, titles, images, texts);
         viewPager.setAdapter(adapter);
@@ -91,10 +97,10 @@ public class MainActivity extends AppCompatActivity {
         mIndicator1 = (UnderlinePageIndicator) findViewById(R.id.indicator1);
         mIndicator1.setFades(false);
         mIndicator1.setViewPager(viewPager);
-        db = new DatabaseHandler(this);
-        DataModel data = new DataModel();
+        db = new DatabaseHandler(this); //initialising the database handler class
+        DailyStore data = new DailyStore();
         String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-        boolean exists = db.rowExists(date);
+        boolean exists = db.rowExists(date); //checking if there is a row in the database for today , if not create an empty row with today's date as the key
         if (!exists) {
             data.setDate(date);
             data.setActivityTime(0);
@@ -103,58 +109,56 @@ public class MainActivity extends AppCompatActivity {
             data.setWater(0);
             db.addHealthData(data);
         }
-        db.readData(date);
-        lastActive = db.updateLastActive(date);
-        buildFitnessClient();
-        readDataFromDB();
+        db.readDailyResults(date); //read the daily results stored in the database for the current date
+        lastActive = db.updateLastActive(date); //read the last active date and store this in a variable
+        buildFitnessClient(); //connect to the google fit account
+        readDataFromDB(); //connecting to google fit will update the daily results - re read the daily results for the current date
+        /*
+        Alarm Manager - initialling and setting the intent for this to be the alarm receiver class to send notification
+        Alarm is set to repeat at 3pm daily
+         */
         AlarmManager alarmMgr;
         PendingIntent alarmIntent;
         alarmMgr = (AlarmManager) this.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(this, AlarmReceiver.class);
+        Intent intent = new Intent(this, AlarmReceiver.class); //set intent to the alarm receiver when alarm is set off
         alarmIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 15);
+        calendar.set(Calendar.HOUR_OF_DAY, 15); //set time of alarm to 3pm
         calendar.set(Calendar.MINUTE, 00);
         alarmMgr.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(),
-                AlarmManager.INTERVAL_DAY, alarmIntent);
-        SAMPLE_SESSION_NAME = "Time";
-        db.addTrophies();
-
-
+                AlarmManager.INTERVAL_DAY, alarmIntent); //repeat the alarm daily
+        db.addTrophies(); //add the trophies table to the db (this checks if it exists first before adding so there
+        //are not multiple rows.
     }
 
+    /*
+     Method taken and altered to fit needs from https://developers.google.com/fit/android/get-started#step_5_connect_to_the_fitness_service
+     */
     public void buildFitnessClient() {
-        mClient = new GoogleApiClient.Builder(MainActivity.this)
-                .addApi(Fitness.HISTORY_API)
-                .addApi(Fitness.CONFIG_API)
-                .addApi(Fitness.SESSIONS_API)
-                .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE))
-                .addConnectionCallbacks(
+        mClient = new GoogleApiClient.Builder(MainActivity.this) //builds the google API client
+                .addApi(Fitness.HISTORY_API) //requests access to the history api
+                .addScope(new Scope(Scopes.FITNESS_ACTIVITY_READ_WRITE)) //requests the ability to read and write fitness data
+                .addConnectionCallbacks( //connection callbacks set up - when the api returns a connection
                         new GoogleApiClient.ConnectionCallbacks() {
                             @Override
-                            public void onConnected(Bundle bundle) {
+                            public void onConnected(Bundle bundle) { //when app gets connected to google fit
                                 Log.i(TAG, "Connected!!!");
-                                //getStepTotal();
-                                Date today = new Date();
-                                Calendar active = Calendar.getInstance();
+                                Date today = new Date(); //sets a variable date - to today's date
+                                Calendar active = Calendar.getInstance(); //creates new date for the last active
                                 try {
-                                    Log.i("ACTIVE TIME, ", "Active: " + new SimpleDateFormat("dd-MM-yyyy").parse(lastActive));
-                                    active.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(lastActive));
+                                    active.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(lastActive)); //parses the last active and sets it to the active variable
                                 } catch (Exception e) {
                                     Log.e("Error", e.toString());
                                 }
-
-                                Log.i("Active: ", "Today: " + today.compareTo(active.getTime()));
-                                while (today.compareTo(active.getTime()) >= 0) {
-                                    GetSteps getSteps = new GetSteps();
-                                    Log.i("ACTIVE", new SimpleDateFormat("dd-MM-yyyy").format(active.getTime()));
+                                //the code below updates the results from google fit from the last active date to the current date to ensure accurate results
+                                while (today.compareTo(active.getTime()) >= 0) { //while the active date is not after today's date
+                                    GetSteps getSteps = new GetSteps();  //get the results for the step count for that date
                                     getSteps.execute(new SimpleDateFormat("dd-MM-yyyy").format(active.getTime()));
-                                    GetActivityTime activityTime = new GetActivityTime();
+                                    GetActivityTime activityTime = new GetActivityTime(); //gets the results for activity time for that date
                                     activityTime.execute(new SimpleDateFormat("dd-MM-yyyy").format(active.getTime()));
                                     checkTrophies(new SimpleDateFormat("dd-MM-yyyy").format(active.getTime()));
-                                    active.add(Calendar.DAY_OF_YEAR, +1);
-                                    Log.i("Active: ", "Today: " + today.compareTo(active.getTime()));
+                                    active.add(Calendar.DAY_OF_YEAR, +1); //adds one day to the last active date
                                 }
                             }
 
@@ -222,138 +226,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void getStepTotal() {
-        PendingResult<DailyTotalResult> result = Fitness.HistoryApi.readDailyTotal(mClient, DataType.TYPE_STEP_COUNT_DELTA);
-        result.setResultCallback(new ResultCallback<DailyTotalResult>() {
-            @Override
-            public void onResult(DailyTotalResult dailyTotalResult) {
-                DataSet totalSet = dailyTotalResult.getTotal();
-                long total = totalSet.isEmpty()
-                        ? 0
-                        : totalSet.getDataPoints().get(0).getValue(Field.FIELD_STEPS).asInt();
-                steps = (int) total;
-                String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-                db.updateSteps(steps, date);
-                readDataFromDB();
-                adapter.notifyDataSetChanged();
-            }
-        });
-    }
-
-    private class GetSteps extends AsyncTask<String, Void, Void> {
-        protected Void doInBackground(String... args) {
-            Calendar cal = Calendar.getInstance();
-            try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(args[0].toString()));
-            } catch (Exception e) {
-
-            }
-            cal.set(Calendar.HOUR_OF_DAY, 23);
-            cal.set(Calendar.MINUTE, 59);
-            long endTime = cal.getTimeInMillis();
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            long startTime = cal.getTimeInMillis();
-
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-            Log.i(TAG, "Range Start: " + dateFormat.format(startTime));
-            Log.i(TAG, "Range End: " + dateFormat.format(endTime));
-
-            DataReadRequest readRequest = new DataReadRequest.Builder()
-                    // The data request can specify multiple data types to return, effectively
-                    // combining multiple data queries into one call.
-                    // In this example, it's very unlikely that the request is for several hundred
-                    // datapoints each consisting of a few steps and a timestamp.  The more likely
-                    // scenario is wanting to see how many steps were walked per day, for 7 days.
-                    .aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
-                            // Analogous to a "Group By" in SQL, defines how data should be aggregated.
-                            // bucketByTime allows for a time span, whereas bucketBySession would allow
-                            // bucketing by "sessions", which would need to be defined in code.
-                    .bucketByTime(1, TimeUnit.DAYS)
-                    .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
-                    .build();
-
-            DataReadResult dataReadResult =
-                    Fitness.HistoryApi.readData(mClient, readRequest).await(1, TimeUnit.MINUTES);
-
-// Get a list of the sessions that match the criteria to check the result.
-            Log.i(TAG, "Session read was successful. Number of returned sessions is: "
-                    + dataReadResult.getBuckets().size());
-
-
-            for (Bucket bucket : dataReadResult.getBuckets()) {
-                // Process the session
-                DataSet data = bucket.getDataSet(DataType.AGGREGATE_STEP_COUNT_DELTA);
-                dumpStepDataSet(data);
-
-            }
-            return null;
-        }
-    }
-
-
-    private class GetActivityTime extends AsyncTask<String, Void, Void> {
-        protected Void doInBackground(String... args) {
-            Calendar cal = Calendar.getInstance();
-
-            Log.i("DATE", args[0].toString());
-            try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(args[0].toString()));
-            } catch (Exception e) {
-
-            }
-            cal.set(Calendar.HOUR_OF_DAY, 23);
-            cal.set(Calendar.MINUTE, 59);
-            long endTime = cal.getTimeInMillis();
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            long startTime = cal.getTimeInMillis();
-
-            SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-            Log.i(TAG, "Range Start: " + dateFormat.format(startTime));
-            Log.i(TAG, "Range End: " + dateFormat.format(endTime));
-
-            DataReadRequest readRequest = new DataReadRequest.Builder()
-                    // The data request can specify multiple data types to return, effectively
-                    // combining multiple data queries into one call.
-                    // In this example, it's very unlikely that the request is for several hundred
-                    // datapoints each consisting of a few steps and a timestamp.  The more likely
-                    // scenario is wanting to see how many steps were walked per day, for 7 days.
-                    .aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY)
-                            // Analogous to a "Group By" in SQL, defines how data should be aggregated.
-                            // bucketByTime allows for a time span, whereas bucketBySession would allow
-                            // bucketing by "sessions", which would need to be defined in code.
-                    .bucketByTime(1, TimeUnit.DAYS)
-                    .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS)
-                    .build();
-
-            DataReadResult dataReadResult =
-                    Fitness.HistoryApi.readData(mClient, readRequest).await(1, TimeUnit.MINUTES);
-
-// Get a list of the sessions that match the criteria to check the result.
-            Log.i(TAG, "Session read was successful. Number of returned sessions is: "
-                    + dataReadResult.getBuckets().size());
-
-
-            for (Bucket bucket : dataReadResult.getBuckets()) {
-                // Process the session
-                DataSet data = bucket.getDataSet(DataType.AGGREGATE_ACTIVITY_SUMMARY);
-                dumpDataSet(data);
-
-            }
-            return null;
-        }
-    }
-
-    public void readDataFromDB() {
+    public void readDataFromDB() { //method to read data from the db and update the values on the view pager correctly
         String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
-        DataModel data = db.readData(date);
-        Log.d("Data", "Steps: " + db + data.getSteps() + "Water " + data.getWater() + "Fruit " + data.getFruitAndVeg() + "Activity" + data.getActivityTime());
+        DailyStore data = db.readDailyResults(date); //read the results from the database and set results to the daily store
+        //set the values array to updated values
         values[0] = data.getSteps();
         values[1] = data.getWater();
         values[2] = data.getFruitAndVeg();
         values[3] = data.getActivityTime();
-        adapter.notifyDataSetChanged();
+        adapter.notifyDataSetChanged(); //notify view pager adapter the values have changed so they can be updated
     }
 
     @Override
@@ -374,8 +255,15 @@ public class MainActivity extends AppCompatActivity {
         outState.putBoolean(AUTH_PENDING, authInProgress);
     }
 
+    /*
+        This method is called when the user presses either the plus or minus button on the water
+        or the fruit and veg page this method is called. This updates the value depending on the button pressed
+        This is determined using tags. It also associates a positive or negative beep depending on the button pressed.
+        If new award is achieved this is shown by a pop up dialog which is initialised and displayed here.
+     */
     public void updateData(View view) {
         String date = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+        // code to build the alert dialog and change its attributes
         final AlertDialog.Builder builder = new AlertDialog.Builder(this);
         LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view1 = inflater.inflate(R.layout.custom_dialog, null);
@@ -390,30 +278,38 @@ public class MainActivity extends AppCompatActivity {
         TextView text1 = (TextView) view1.findViewById(R.id.textAward);
         ImageView imageAward = (ImageView) view1.findViewById(R.id.image);
         Button close = (Button) view1.findViewById(R.id.close);
-        final AlertDialog dialog = builder.create();
+        final AlertDialog dialog = builder.create(); //creates the dialog with the attributes changed above
+        final MediaPlayer mpPositive = MediaPlayer.create(this, R.raw.positive); //creates the positive beep noise
+        final MediaPlayer mpNegative = MediaPlayer.create(this, R.raw.negative); //creates the negative beep noise
         close.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View v) { //when the close button is click dismiss the dialog
                 dialog.dismiss();
             }
         });
-        if (view.getTag() != null) {
+        if (view.getTag() != null) { //checks if the tag is null or not - the buttons should always have a tag
             int result;
-            if (view.getTag().toString() == "plusWater" || view.getTag().toString() == "minusWater") {
-                if (view.getTag().toString() == "plusWater") {
-                    result = values[1] + 1;
-                } else {
-                    if ((values[1] - 1) > 0) {
-                        result = values[1] - 1;
-                    } else {
-                        result = 0;
-                        Toast.makeText(this, "Water can't be a minus value", Toast.LENGTH_SHORT).show();
+            if (view.getTag().toString() == "plusWater" || view.getTag().toString() == "minusWater") { //checks if its the water page the button was pressed on
+                if (view.getTag().toString() == "plusWater") { //if tag is plus water
+                    result = values[1] + 1; //add one to the value stored currently - save this in local variable
+                    mpPositive.start(); //sound the positive beep sound
+                    Toast.makeText(this, "Well Done!", Toast.LENGTH_SHORT).show(); //show well done toast message
+                } else { //if its not plus water - it must be negative
+                    if ((values[1] - 1) > 0) { //if the result will be greater than 0
+                        result = values[1] - 1; //take one away from the value stored currently and save this in a local variable
+                        mpNegative.start(); //play the negative beep sound
+                    } else { //if the result ill be less than 1
+                        result = 0; //set it to zero
+                        if ((values[1] - 1) < 0) { //if result would have been less than zero then provide error message
+                            Toast.makeText(this, "Water can't be a minus value", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
-                db.updateWater(result, date);
-                readDataFromDB();
-                adapter.notifyDataSetChanged();
-                if (view.getTag().toString() != "minusWater") {
+                db.updateWater(result, date); //update result in the database
+                readDataFromDB(); //update the results show
+                adapter.notifyDataSetChanged(); //notify the view pager adapter of the changed values
+                if (view.getTag().toString() != "minusWater") { //if has achieved a new reward and not going back to a previously earned reward
+                    //check if they have achieved a new award - if so display the correct star and text and show the dialog
                     if (result == 4) {
                         text1.setText("Bronze Award!");
                         imageAward.setImageResource(R.drawable.bronze_star);
@@ -428,26 +324,32 @@ public class MainActivity extends AppCompatActivity {
                         dialog.show();
                     }
                 }
-            } else if (view.getTag().toString() == "minusFruit" || view.getTag().toString() == "plusFruit") {
-                if (view.getTag().toString() == "plusFruit") {
-                    result = values[2] + 1;
-                } else {
-                    if ((values[2] - 1) > 0) {
-                        result = values[2] - 1;
-                    } else {
-                        result = 0;
-                        Toast.makeText(this, "Fruit and Veg can't be a minus value", Toast.LENGTH_SHORT).show();
+            } else if (view.getTag().toString() == "minusFruit" || view.getTag().toString() == "plusFruit") { //checks if the button was on the fruit page
+                if (view.getTag().toString() == "plusFruit") { //checks if it was the plus fruit button pressed
+                    result = values[2] + 1; //adds one to the current fruit value
+                    mpPositive.start(); //plays positive beep sound
+                    Toast.makeText(this, "Well Done!", Toast.LENGTH_SHORT).show(); //shows well done message
+                } else { //if not it had to be the minus fruit button
+                    if ((values[2] - 1) > 0) { // checks if taking one away from the result will be greater than zero
+                        result = values[2] - 1; //takes one away from the current fruit value
+                        mpNegative.start(); //plays negative beep
+                    } else { //if the result will be equal to or less than zero
+                        result = 0;//sets the result to zero
+                        if ((values[1] - 1) < 0) { //if result would have been less than zero then provide error message
+                            Toast.makeText(this, "Fruit and Veg can't be a minus value", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
-                db.updateFruit(result, date);
-                readDataFromDB();
-                adapter.notifyDataSetChanged();
-                if (view.getTag().toString() != "minusFruit") {
+                db.updateFruit(result, date); //updates the fruit value in the database
+                readDataFromDB(); //reads the updated results from the database
+                adapter.notifyDataSetChanged(); //notify adapters that the values have been updated
+                if (view.getTag().toString() != "minusFruit") { //checks that the award will not have already be previously earned before
+                    //check if they have achieved a new award - if so display the correct star and text and show the dialog
                     if (result == 2) {
                         text1.setText("Bronze Award!");
                         imageAward.setImageResource(R.drawable.bronze_star);
                         dialog.show();
-                    } else if (result == 4) {
+                    } else if (result == 4) { //if silver award has been achieved - show the dialog for silver award
                         text1.setText("Silver Award!");
                         imageAward.setImageResource(R.drawable.silver_star);
                         dialog.show();
@@ -461,116 +363,100 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /*
+        Code below has been altered to fit needs and taken from https://developers.google.com/fit/android/history#read_detailed_and_aggregate_data
+     */
 
-    private void dumpDataSet(DataSet dataSet) {
-        Log.i(TAG, "Data returned for Data type: " + dataSet.getDataType().getName());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy   HH:mm");
-        long totalDuration = 0;
+    private void dumpDataSet(DataSet dataSet) { //the data from the activity request is passed in here
+        long totalDuration = 0; //variable to store total duration
         Date date = new Date();
-
-
-        for (DataPoint dp : dataSet.getDataPoints()) {
-            long duration1 = TimeUnit.MILLISECONDS.toMinutes(dp.getValue(Field.FIELD_DURATION).asInt());
-            //totalDuration += duration;
-            int activity = dp.getValue(Field.FIELD_ACTIVITY).asInt();
+        for (DataPoint dp : dataSet.getDataPoints()) { //for loop through all data points
+            int activity = dp.getValue(Field.FIELD_ACTIVITY).asInt();//gets the activity code and stores this as a variable
             date.setTime(dp.getStartTime(TimeUnit.MILLISECONDS));
             Date endDate = new Date();
             endDate.setTime(dp.getEndTime(TimeUnit.MILLISECONDS));
-            Log.i("GarethTest", new SimpleDateFormat("dd-MM-yyyy").format(date));
-            //Log.i("GarethTest", "HEREEEEREREREREREREREREREREREREREREEEEEEEEEEEEE :           " + duration1);
-            //Log.i("GarethTest", "Start : " + new SimpleDateFormat("dd-MM-yyyy").format(date) + "   End: " + new SimpleDateFormat("dd-MM-yyyy").format(endDate) + "  Activity: " + dp.getValue(Field.FIELD_ACTIVITY).asInt() + "   Duration:  " +TimeUnit.MILLISECONDS.toMinutes(dp.getValue(Field.FIELD_DURATION).asInt()));
-            if (activity != 3 && activity != 0) {
-                long duration = TimeUnit.MILLISECONDS.toMinutes(dp.getValue(Field.FIELD_DURATION).asInt());
-                totalDuration += duration;
-                date.setTime(dp.getStartTime(TimeUnit.MILLISECONDS));
+            if (activity != 3 && activity != 0) { //if the activity is not active then exclude - ie 3 = Still(not moving) 0 = In Vehicle
+                long duration = TimeUnit.MILLISECONDS.toMinutes(dp.getValue(Field.FIELD_DURATION).asInt()); //converted the duration from milliseconds to minutes
+                totalDuration += duration; //this duration is added to the total
+                date.setTime(dp.getStartTime(TimeUnit.MILLISECONDS)); //sets the date to the time of the start of the datapoint - this will always be in one day
 
-                final int test = (int) totalDuration;
-                final Date dateTest = date;
+                final int finalDuration = (int) totalDuration;
+                final Date finalDate = date;
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        String date = new SimpleDateFormat("dd-MM-yyyy").format(dateTest);
-                        Log.i("GarethTest", "Start : " + date + "  Activity: " + " Duration:  " + test);
-                        if (test != 0) {
-                            db.updateActivity(test, date);
+                        String date = new SimpleDateFormat("dd-MM-yyyy").format(finalDate);
+                        if (finalDuration >= 0) {
+                            db.updateActivity(finalDuration, date);  //updates the duration of activity for today's date
                         }
-                        readDataFromDB();
-                        adapter.notifyDataSetChanged();
-
-
+                        readDataFromDB(); //reads the updated data from the database
+                        adapter.notifyDataSetChanged(); //notify view pagers adapter of the updated data
                     }
                 });
             }
-
         }
     }
 
     private void dumpStepDataSet(DataSet dataSet) {
-        Log.i(TAG, "Data returned for Data type: " + dataSet.getDataType().getName());
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy   HH:mm");
-        int steps = 0;
+        int steps = 0; //variable to store the step count
         Date date = new Date();
-
-
-        for (DataPoint dp : dataSet.getDataPoints()) {
-            steps = dp.getValue(Field.FIELD_STEPS).asInt();
-            //totalDuration += duration
-            date.setTime(dp.getStartTime(TimeUnit.MILLISECONDS));
-            Date endDate = new Date();
-            endDate.setTime(dp.getEndTime(TimeUnit.MILLISECONDS));
-            Log.i("GarethTest", new SimpleDateFormat("dd-MM-yyyy").format(date));
-            //Log.i("GarethTest", "HEREEEEREREREREREREREREREREREREREREEEEEEEEEEEEE :           " + duration1);
-            //Log.i("GarethTest", "Start : " + new SimpleDateFormat("dd-MM-yyyy").format(date) + "   End: " + new SimpleDateFormat("dd-MM-yyyy").format(endDate) + "  Activity: " + dp.getValue(Field.FIELD_ACTIVITY).asInt() + "   Duration:  " +TimeUnit.MILLISECONDS.toMinutes(dp.getValue(Field.FIELD_DURATION).asInt()));
-
-            final int test = (int) steps;
-            final Date dateTest = date;
+        for (DataPoint dp : dataSet.getDataPoints()) { //for loop through all datapoints
+            steps = dp.getValue(Field.FIELD_STEPS).asInt(); //gets value of steps from the datapoint
+            date.setTime(dp.getStartTime(TimeUnit.MILLISECONDS)); //sets the date to the start date of the data point
+            final int finalSteps = steps;
+            final Date finalDate = date;
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    String date = new SimpleDateFormat("dd-MM-yyyy").format(dateTest);
-                    Log.i("GarethTest", "Start : " + date + "  Activity: " + " Duration:  " + test);
-                    if (test != 0) {
-                        db.updateSteps(test, date);
+                    String date = new SimpleDateFormat("dd-MM-yyyy").format(finalDate);
+                    if (finalSteps >= 0) {
+                        db.updateSteps(finalSteps, date); //updates the data in the database for steps for date passed in
                     }
-                    readDataFromDB();
-                    adapter.notifyDataSetChanged();
-
-
+                    readDataFromDB(); //reads updated data from the db
+                    adapter.notifyDataSetChanged(); //notify adapter that the values have been updated
                 }
             });
         }
 
     }
 
+    /*
+        Method to check to see if the user has earned any trophies
+        This is checked by for looping through the days to check if they have matched the requirements for the trophies
+        Parameter: The date to check the trophies from
+     */
+
     public void checkTrophies(String date) {
-        TrophyModel currentTrophies = db.readTrophies();
+        TrophyStore currentTrophies = db.readTrophies(); //read the current trophies earned by the users
         Log.d("Trophies", "Streak:   " + db.getStreak());
 
-        if (currentTrophies.getUsage().equals("N")) {
-            if (db.getStreak() >= 2) {
-                db.updateTrophies("Usage", "B");
+        if (currentTrophies.getUsage().equals("N")) { //if they currently haven't earned a trophy for usage
+            if (db.getStreak() >= 2) { //check if their streak is greater than or equal to 2
+                db.updateTrophies("Usage", "B"); //if it is then update usage trophy to bronze
             }
-        } else if (currentTrophies.getUsage().equals("B")) {
-            if (db.getStreak() >= 7) {
-                db.updateTrophies("Usage", "S");
+        } else if (currentTrophies.getUsage().equals("B")) { //if they have a bronze award for usage
+            if (db.getStreak() >= 7) { //check if their streak is greater than or equal to 7 ie a week in a row
+                db.updateTrophies("Usage", "S"); //if it is then update usage trophy to silver
             }
-        } else if (currentTrophies.getUsage().equals("S")) {
-            if (db.getStreak() >= 14) {
-                db.updateTrophies("Usage", "G");
+        } else if (currentTrophies.getUsage().equals("S")) { //if they have a silver award for usage
+            if (db.getStreak() >= 14) { //check if their streak is greater than or equal to 14 ie two weeks in a row
+                db.updateTrophies("Usage", "G"); //if it is update usage trophy to gold
             }
         }
 
-        if (currentTrophies.getEverything().equals("N")) {
+        if (currentTrophies.getEverything().equals("N")) { //if they have no trophy for everything area yet
             Calendar cal = Calendar.getInstance();
             try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date)); //set the date to the date being checked for trophies
             } catch (Exception e) {
                 Log.e("Error", e.toString());
             }
-            boolean result = true;
-            for (int i = 0; i < 7; i++) {
+            boolean result = true; //if all requirements are met this will not be changed
+            for (int i = 0; i < 7; i++) { //for loop for 7 ( 7 days ie for one week)
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
-                DataModel data = db.readData(updatedDate);
+                DailyStore data = db.readDailyResults(updatedDate); //read the results for that date
+                //check if there is data in the row, if there is check if the results are over the bronze targets
+                //if not break the for loop and set result to be false;
                 if (data == null) {
                     result = false;
                     break;
@@ -587,22 +473,24 @@ public class MainActivity extends AppCompatActivity {
                     result = false;
                     break;
                 }
-                cal.add(Calendar.DAY_OF_YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, -1); //take one day away from the current date - to check the previous days results - for loop means this is repeated 7 times
             }
             if (result) {
-                db.updateTrophies("Everything", "B");
+                db.updateTrophies("Everything", "B"); //if this meets the requirements for a bronze trophy - update the everything trophy to bronze
             }
-        } else if (currentTrophies.getEverything().equals("B")) {
+        } else if (currentTrophies.getEverything().equals("B")) { //if the user currently has a bronze trophy for everything
             Calendar cal = Calendar.getInstance();
             try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date)); //set the date to the date being checked
             } catch (Exception e) {
                 Log.e("Error", e.toString());
             }
-            boolean result = true;
-            for (int i = 0; i < 7; i++) {
+            boolean result = true; //if all requirements are met this will not be changed
+            for (int i = 0; i < 7; i++) { //for loop for the 7 days being checked
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
-                DataModel data = db.readData(updatedDate);
+                DailyStore data = db.readDailyResults(updatedDate); //reads the data for the day for that date from the db
+                //check if there is data in the row, if there is check if the results are over the silver targets
+                //if not break the for loop and set result to be false;
                 if (data == null) {
                     result = false;
                     break;
@@ -619,23 +507,24 @@ public class MainActivity extends AppCompatActivity {
                     result = false;
                     break;
                 }
-                cal.add(Calendar.DAY_OF_YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, -1);  //take one day away from the current date - to check the previous days results - for loop means this is repeated 7 times
             }
             if (result) {
-                db.updateTrophies("Everything", "S");
+                db.updateTrophies("Everything", "S");//if this meets the requirements for a bronze trophy - update the everything trophy to silver
             }
-        } else if (currentTrophies.getEverything().equals("S")) {
+        } else if (currentTrophies.getEverything().equals("S")) { //checks if the user currently has a silver trophy for everything
             Calendar cal = Calendar.getInstance();
             try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date)); //sets the date to the date being checkked
             } catch (Exception e) {
                 Log.e("Error", e.toString());
             }
-            boolean result = true;
-            for (int i = 0; i < 7; i++) {
+            boolean result = true; //if all requirements are met this will not be changed
+            for (int i = 0; i < 7; i++) { // for loop through the seven days being checked
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
-                Log.d("Dates", "Everything:  " + updatedDate);
-                DataModel data = db.readData(updatedDate);
+                DailyStore data = db.readDailyResults(updatedDate); //reads the results from the db for that date
+                //check if there is data in the row, if there is check if the results are over the gold targets
+                //if not break the for loop and set result to be false;
                 if (data == null) {
                     result = false;
                     break;
@@ -652,166 +541,164 @@ public class MainActivity extends AppCompatActivity {
                     result = false;
                     break;
                 }
-                cal.add(Calendar.DAY_OF_YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, -1); //take one day away from the current date - to check the  previous days results - for loop means this is repeated 7 times
             }
             if (result) {
-                db.updateTrophies("Everything", "G");
+                db.updateTrophies("Everything", "G"); //if the result is still true - all requirements are met - update everything trophy to gold award
             }
         }
 
-        if (currentTrophies.getSteps().equals("N")) {
+        if (currentTrophies.getSteps().equals("N")) { //checks if the user has no current rewarded trophy for steps
             Calendar cal = Calendar.getInstance();
             try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date)); //sets the date to the date being check from for trophies
             } catch (Exception e) {
                 Log.e("Error", e.toString());
             }
-            boolean result = true;
-            for (int i = 0; i < 7; i++) {
+            boolean result = true; // if all requirements are met then this will not change
+            for (int i = 0; i < 7; i++) { //loops through 7 times (ie for 7 days - one week)
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
-                DataModel data = db.readData(updatedDate);
+                DailyStore data = db.readDailyResults(updatedDate); //reads the results for the date being checked
                 if (data == null) {
                     result = false;
                     break;
-                } else if (data.getSteps() < 5000) {
-                    result = false;
+                } else if (data.getSteps() < 5000) { //checks if the results are less than the bronze target (5000)
+                    result = false; //if it is then returns false and breaks from for loop
                     break;
                 }
-                cal.add(Calendar.DAY_OF_YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, -1);//take one day away from the current date - to check the  previous days results - for loop means this is repeated 7 times
             }
             if (result) {
-                db.updateTrophies("Steps", "B");
+                db.updateTrophies("Steps", "B"); //if result is still true - requirements have been met so update step trophy to bronze
             }
-        } else if (currentTrophies.getSteps().equals("B")) {
+        } else if (currentTrophies.getSteps().equals("B")) { //if the current trophy for steps is bronze
             Calendar cal = Calendar.getInstance();
             try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date)); //set date to the date being checked for trophies from
             } catch (Exception e) {
                 Log.e("Error", e.toString());
             }
-            boolean result = true;
-            for (int i = 0; i < 7; i++) {
+            boolean result = true; //if all requirements are met this will not change
+            for (int i = 0; i < 7; i++) { //loops through 7 times - (ie for 7 days - one week)
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
-                DataModel data = db.readData(updatedDate);
-                if (data.getSteps() < 7500) {
-                    result = false;
+                DailyStore data = db.readDailyResults(updatedDate); //reads the results for the date being checked
+                if (data.getSteps() < 7500) { //if the step count for the date is less than the silver target
+                    result = false; //set result to be false and break from the for loop
                     break;
                 }
-                cal.add(Calendar.DAY_OF_YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, -1); ///take one day away from the current date - to check the previous days results - for loop means this is repeated 7 times
             }
             if (result) {
-                db.updateTrophies("Steps", "S");
+                db.updateTrophies("Steps", "S"); //if result is true then requirements have been met so update step trophy to be silver
             }
-        } else if (currentTrophies.getSteps().equals("S")) {
+        } else if (currentTrophies.getSteps().equals("S")){ //checks whether the user current trophy for steps is silver
             Calendar cal = Calendar.getInstance();
             try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date)); //sets the date to be the date being checked from
             } catch (Exception e) {
                 Log.e("Error", e.toString());
             }
-            boolean result = true;
-            for (int i = 0; i < 7; i++) {
+            boolean result = true; //if all requirements are met this shouldnt change - false means requirements have not been met
+            for (int i = 0; i < 7; i++) { //for loop through 7 times - ie 7 days
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
-                Log.d("Dates", "Steps:  " + updatedDate);
-                DataModel data = db.readData(updatedDate);
+                DailyStore data = db.readDailyResults(updatedDate); //reads the results for the current date being checked
                 if (data == null) {
-                    result = false;
+                    result = false; //if there is no data then set result to false and break from for loop
                     break;
-                } else if (data.getSteps() < 10000) {
-                    result = false;
+                } else if (data.getSteps() < 10000) { //if the step count for the date is less than the gold tareet
+                    result = false; //set result to be false and break from the for loop
                     break;
                 }
-                cal.add(Calendar.DAY_OF_YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, -1);//take one day away from the current date - to check the  previous days results - for loop means this is repeated 7 times
             }
             if (result) {
-                db.updateTrophies("Steps", "G");
+                db.updateTrophies("Steps", "G"); //if result is true then requirements have been met - update the step trophy to gold
             }
         }
 
-        if (currentTrophies.getActive().equals("N")) {
+        if (currentTrophies.getActive().equals("N")) { //if the user has not earned a trophy for active time
             Calendar cal = Calendar.getInstance();
             try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date)); //set the date to the date being check
             } catch (Exception e) {
                 Log.e("Error", e.toString());
             }
-            boolean result = true;
-            for (int i = 0; i < 7; i++) {
+            boolean result = true; //if the requirements are met this will not change
+            for (int i = 0; i < 7; i++) { //for loop 7 times - ie 7 days
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
-                Log.d("Dates", "Active:  " + updatedDate);
-                DataModel data = db.readData(updatedDate);
-                if (data == null) {
+                DailyStore data = db.readDailyResults(updatedDate); //reads the data for the current date
+                if (data == null) { //if the data is null, the row is empty , set result to false and break from the for loop
                     result = false;
                     break;
-                } else if (data.getActivityTime() < 10) {
+                } else if (data.getActivityTime() < 10) { //if the result is less than the bronze target, set result to false and break from the for loop
                     result = false;
                     break;
                 }
-                cal.add(Calendar.DAY_OF_YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, -1);//take one day away from the current date - to check the previous days results - for loop means this is repeated 7 tim
             }
             if (result) {
-                db.updateTrophies("Active", "B");
+                db.updateTrophies("Active", "B"); //if result is true, requirements have been met - update the active trophy to bronze
             }
-        } else if (currentTrophies.getActive().equals("B")) {
+        } else if (currentTrophies.getActive().equals("B")) { //if the user current trophy for active is bronze
             Calendar cal = Calendar.getInstance();
             try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date)); //set the date to the date being checked
             } catch (Exception e) {
                 Log.e("Error", e.toString());
             }
-            boolean result = true;
-            for (int i = 0; i < 7; i++) {
+            boolean result = true; //if requirements are met this will not be changed
+            for (int i = 0; i < 7; i++) { // for loop 7 times - ie 7 days
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
-                DataModel data = db.readData(updatedDate);
-                if (data == null) {
+                DailyStore data = db.readDailyResults(updatedDate); //reads the data from the db for the current date
+                if (data == null) { //if the data is null, the row is empty , set result to be false and break from the for loop
                     result = false;
                     break;
-                } else if (data.getActivityTime() < 20) {
+                } else if (data.getActivityTime() < 20) { //if the active time is less than the silver target, set result to be false and break from for loop
                     result = false;
                     break;
                 }
-                cal.add(Calendar.DAY_OF_YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, -1); //take one day away from the current date - to check the previous days results - for loop means this is repeated 7 times
             }
             if (result) {
-                db.updateTrophies("Active", "S");
+                db.updateTrophies("Active", "S"); //if result is true - requirements have been met - update active trophy to silver
             }
-        } else if (currentTrophies.getActive().equals("S")) {
+        } else if (currentTrophies.getActive().equals("S")) { // if the users current trophy for active is silver
             Calendar cal = Calendar.getInstance();
             try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date)); //set the current date to be the one being checked
             } catch (Exception e) {
                 Log.e("Error", e.toString());
             }
-            boolean result = true;
-            for (int i = 0; i < 7; i++) {
+            boolean result = true; // if requirements are met this should not be changed
+            for (int i = 0; i < 7; i++) { //for loop 7 times - ie 7 days
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
-                Log.d("Dates", "Active:  " + updatedDate);
-                DataModel data = db.readData(updatedDate);
-                if (data == null) {
+                DailyStore data = db.readDailyResults(updatedDate); //read the results from the database for the current date
+                if (data == null) { //if the data is null then no data exists so requiremnets have not been met - set result to false and break from for loop
                     result = false;
                     break;
-                } else if (data.getActivityTime() < 30) {
+                } else if (data.getActivityTime() < 30) { //if the active time is less than the gold target - set results to false and break from the for loop
                     result = false;
                     break;
                 }
-                cal.add(Calendar.DAY_OF_YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, -1);//take one day away from the current date - to check the  previous days results - for loop means this is repeated 7 times
             }
             if (result) {
-                db.updateTrophies("Active", "G");
+                db.updateTrophies("Active", "G"); //if result is true - requirements have been met - update the active trophy to gold.
             }
         }
 
-        if (currentTrophies.getFruit().equals("N")) {
+        if (currentTrophies.getFruit().equals("N")) { //if the user has no current trophy for fruit
             Calendar cal = Calendar.getInstance();
             try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date)); //set the date to the date being checked
             } catch (Exception e) {
                 Log.e("Error", e.toString());
             }
-            boolean result = true;
-            for (int i = 0; i < 7; i++) {
+            boolean result = true; //if requirements are met this should not change
+            for (int i = 0; i < 7; i++) { //for loop 7 times -ie 7 days
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
-                DataModel data = db.readData(updatedDate);
+                DailyStore data = db.readDailyResults(updatedDate);
+               //if data is null or the result is less than the bronze target  set result to false and break from the for loop
                 if (data == null) {
                     result = false;
                     break;
@@ -819,22 +706,23 @@ public class MainActivity extends AppCompatActivity {
                     result = false;
                     break;
                 }
-                cal.add(Calendar.DAY_OF_YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, -1); //take one day away from the current date - to check the  previous days results - for loop means this is repeated 7 times
             }
             if (result) {
-                db.updateTrophies("Fruit", "B");
+                db.updateTrophies("Fruit", "B"); //if results is true - then update  the fruit trophy to bronze
             }
-        } else if (currentTrophies.getFruit().equals("B")) {
+        } else if (currentTrophies.getFruit().equals("B")) { //if the current trophy achieved is bronze for fruit
             Calendar cal = Calendar.getInstance();
             try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date)); //set the date to the current date being checked
             } catch (Exception e) {
                 Log.e("Error", e.toString());
             }
-            boolean result = true;
-            for (int i = 0; i < 7; i++) {
+            boolean result = true; //if requiements are met this should not change
+            for (int i = 0; i < 7; i++) { //for loop 7 times - ie 7 days
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
-                DataModel data = db.readData(updatedDate);
+                DailyStore data = db.readDailyResults(updatedDate); //read the results from the db for the current date
+                //if data is null or the result is less than the silver target  set result to false and break from the for loop
                 if (data == null) {
                     result = false;
                     break;
@@ -842,22 +730,23 @@ public class MainActivity extends AppCompatActivity {
                     result = false;
                     break;
                 }
-                cal.add(Calendar.DAY_OF_YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, -1); //take one day away from the current date - to check the  previous days results - for loop means this is repeated 7 times
             }
             if (result) {
-                db.updateTrophies("Fruit", "S");
+                db.updateTrophies("Fruit", "S"); //if result is true - update the fruit trophy to silver
             }
-        } else if (currentTrophies.getFruit().equals("S")) {
+        } else if (currentTrophies.getFruit().equals("S")) { //if the users current active trophy is silver
             Calendar cal = Calendar.getInstance();
             try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date)); //set the date to the date being checked
             } catch (Exception e) {
                 Log.e("Error", e.toString());
             }
-            boolean result = true;
-            for (int i = 0; i < 7; i++) {
+            boolean result = true; //if requirements are met this should not be changed
+            for (int i = 0; i < 7; i++) { //for loop for 7 times - ie 7 times
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
-                DataModel data = db.readData(updatedDate);
+                DailyStore data = db.readDailyResults(updatedDate); //read the results for the current date
+                //if data is null or the result is less than the gold target  set result to false and break from the for loop
                 if (data == null) {
                     result = false;
                     break;
@@ -865,25 +754,26 @@ public class MainActivity extends AppCompatActivity {
                     result = false;
                     break;
                 }
-                cal.add(Calendar.DAY_OF_YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, -1); //take one day away from the current date - to check the  previous days results - for loop means this is repeated 7 times
             }
             if (result) {
-                db.updateTrophies("Fruit", "G");
+                db.updateTrophies("Fruit", "G"); //if result is true update the fruit trophy to gold
             }
         }
 
-        if (currentTrophies.getWater().equals("N")) {
+        if (currentTrophies.getWater().equals("N")) { //if the user has no current trophy for water
             Calendar cal = Calendar.getInstance();
             try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date)); //set the date to the date being checked
             } catch (Exception e) {
                 Log.e("Error", e.toString());
             }
-            boolean result = true;
-            for (int i = 0; i < 7; i++) {
+            boolean result = true; //if requirements are met this should not change
+            for (int i = 0; i < 7; i++) { //for loop for 7 times - ie 7 days
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
                 Log.d("Dates", "Water:  " + updatedDate);
-                DataModel data = db.readData(updatedDate);
+                DailyStore data = db.readDailyResults(updatedDate); //read the results for the current day
+                //if data is null or the result is less than the bronze target  set result to false and break from for loop
                 if (data == null) {
                     result = false;
                     break;
@@ -891,22 +781,23 @@ public class MainActivity extends AppCompatActivity {
                     result = false;
                     break;
                 }
-                cal.add(Calendar.DAY_OF_YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, -1); //take one day away from the current date - to check the  previous days results - for loop means this is repeated 7 times
             }
             if (result) {
-                db.updateTrophies("Water", "B");
+                db.updateTrophies("Water", "B"); //if result is true update the water trophy to bronze
             }
-        } else if (currentTrophies.getWater().equals("B")) {
+        } else if (currentTrophies.getWater().equals("B")) { //if the current trophy for water is bronze
             Calendar cal = Calendar.getInstance();
             try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date)); //set the date to be the date being checked
             } catch (Exception e) {
                 Log.e("Error", e.toString());
             }
-            boolean result = true;
-            for (int i = 0; i < 7; i++) {
+            boolean result = true; //if requirements are met this should not change
+            for (int i = 0; i < 7; i++) { //for loop 7 times - ie 7 days
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
-                DataModel data = db.readData(updatedDate);
+                DailyStore data = db.readDailyResults(updatedDate); //read the data from the db for the current date
+                //if data is null or the result is less than the silver target  set result to false and break from the for loop
                 if (data == null) {
                     result = false;
                     break;
@@ -914,22 +805,23 @@ public class MainActivity extends AppCompatActivity {
                     result = false;
                     break;
                 }
-                cal.add(Calendar.DAY_OF_YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, -1); //take one day away from the current date - to check the  previous days results - for loop means this is repeated 7 times
             }
             if (result) {
-                db.updateTrophies("Water", "S");
+                db.updateTrophies("Water", "S"); //if result is true - update the water trophy to silver
             }
-        } else if (currentTrophies.getWater().equals("S")) {
+        } else if (currentTrophies.getWater().equals("S")) { //if the users current trophy for water is silver
             Calendar cal = Calendar.getInstance();
             try {
-                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date));
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(date)); //set the date to the date being checked
             } catch (Exception e) {
                 Log.e("Error", e.toString());
             }
-            boolean result = true;
-            for (int i = 0; i < 7; i++) {
+            boolean result = true; //if requirements are met this should not change
+            for (int i = 0; i < 7; i++) { //for loop 7 times - ie 7 days
                 String updatedDate = new SimpleDateFormat("dd-MM-yyyy").format(cal.getTime());
-                DataModel data = db.readData(updatedDate);
+                DailyStore data = db.readDailyResults(updatedDate); //read the results for the current date
+                //if data is null or the result is less than the gold target  set result to false and break from the for loop
 
                 if (data == null) {
                     result = false;
@@ -938,11 +830,81 @@ public class MainActivity extends AppCompatActivity {
                     result = false;
                     break;
                 }
-                cal.add(Calendar.DAY_OF_YEAR, -1);
+                cal.add(Calendar.DAY_OF_YEAR, -1); //take one day away from the current date - to check the  previous days results - for loop means this is repeated 7 times
             }
             if (result) {
-                db.updateTrophies("Water", "G");
+                db.updateTrophies("Water", "G"); //if the result is true then update the water trophy to gold
             }
+        }
+    }
+
+    /*
+        Code below has been altered to fit needs and taken from https://developers.google.com/fit/android/history#read_detailed_and_aggregate_data
+     */
+
+    private class GetSteps extends AsyncTask<String, Void, Void> {
+        protected Void doInBackground(String... args) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(args[0].toString())); //read the first argument passed in and set this to the date
+            } catch (Exception e) {
+
+            }
+            cal.set(Calendar.HOUR_OF_DAY, 23);
+            cal.set(Calendar.MINUTE, 59);
+            long endTime = cal.getTimeInMillis();
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            long startTime = cal.getTimeInMillis();
+            DataReadRequest readRequest = new DataReadRequest.Builder()
+                    .aggregate(DataType.TYPE_STEP_COUNT_DELTA, DataType.AGGREGATE_STEP_COUNT_DELTA)
+                    .bucketByTime(1, TimeUnit.DAYS) //split into daily buckets (this should only return one bucket)
+                    .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS) //sets the time range to days results from midnight to 11.59pm
+                    .build(); //builds the request
+
+            DataReadResult dataReadResult =
+                    Fitness.HistoryApi.readData(mClient, readRequest).await(1, TimeUnit.MINUTES); //makes request to read data
+
+            for (Bucket bucket : dataReadResult.getBuckets()) { //for every bucket of data (should only be one in this case as we request a range of a day)
+                DataSet data = bucket.getDataSet(DataType.AGGREGATE_STEP_COUNT_DELTA);
+                dumpStepDataSet(data); //dumpStepDataSet method called and passes in the step data
+            }
+            return null;
+        }
+    }
+
+    private class GetActivityTime extends AsyncTask<String, Void, Void> {
+        protected Void doInBackground(String... args) {
+            Calendar cal = Calendar.getInstance();
+            try {
+                cal.setTime(new SimpleDateFormat("dd-MM-yyyy").parse(args[0].toString()));//read the first argument passed in and set this to the date
+            } catch (Exception e) {
+
+            }
+            //set the start time to be midnight and the end time to be 11.59pm - ie one day results
+            cal.set(Calendar.HOUR_OF_DAY, 23);
+            cal.set(Calendar.MINUTE, 59);
+            long endTime = cal.getTimeInMillis();
+            cal.set(Calendar.HOUR_OF_DAY, 0);
+            cal.set(Calendar.MINUTE, 0);
+            long startTime = cal.getTimeInMillis();
+
+            DataReadRequest readRequest = new DataReadRequest.Builder()
+                    .aggregate(DataType.TYPE_ACTIVITY_SEGMENT, DataType.AGGREGATE_ACTIVITY_SUMMARY)
+                    .bucketByTime(1, TimeUnit.DAYS) //split into daily buckets (this should only return one bucket)
+                    .setTimeRange(startTime, endTime, TimeUnit.MILLISECONDS) //sets the time range to days results from midnight to 11.59pm
+                    .build();
+
+            DataReadResult dataReadResult =
+                    Fitness.HistoryApi.readData(mClient, readRequest).await(1, TimeUnit.MINUTES); //makes request to read data and stores result
+
+            for (Bucket bucket : dataReadResult.getBuckets()) { //for every bucket of data (should only be one in this case as we request a range of a day)
+                // Process the session
+                DataSet data = bucket.getDataSet(DataType.AGGREGATE_ACTIVITY_SUMMARY);
+                dumpDataSet(data); //calls the dumpDataSet method and passes in activity data
+
+            }
+            return null;
         }
     }
 }

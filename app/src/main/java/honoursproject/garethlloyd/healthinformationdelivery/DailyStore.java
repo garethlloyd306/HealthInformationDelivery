@@ -1,15 +1,17 @@
 package honoursproject.garethlloyd.healthinformationdelivery;
 
-
-public class DataModel {
-    //TODO make all private
+/*
+    Data store for the daily results
+    Written by Gareth Lloyd
+ */
+public class DailyStore {
     private int fruit_and_veg;
-    int water;
-    String date;
-    int steps;
-    int activityTime;
+    private int water;
+    private String date;
+    private int steps;
+    private int activityTime;
 
-    public int getFruitAndVeg(){
+    public int getFruitAndVeg() {
         return fruit_and_veg;
     }
 

@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:paddingBottom="@dimen/activity_vertical_margin"
-android:paddingLeft="@dimen/activity_horizontal_margin"
-android:paddingRight="@dimen/activity_horizontal_margin"
-android:paddingTop="@dimen/activity_vertical_margin"
-app:layout_behavior="@string/appbar_scrolling_view_behavior"
-tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivity">
 
     <TextView
         android:id="@+id/title"
@@ -18,16 +18,16 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_gravity="center_horizontal"
-        android:text="Trophies"
+        android:text="@string/trophies"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <HorizontalScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:layout_below="@id/title"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="50dp"
-        android:id="@+id/scrollView"
         android:background="@drawable/border">
 
         <LinearLayout
@@ -156,7 +156,6 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
                 android:src="@drawable/bronze_trophy" />
 
 
-
             <ImageView
                 android:id="@+id/trophy14"
                 android:layout_width="wrap_content"
@@ -203,29 +202,28 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
                 android:src="@drawable/trophy" />
 
 
-
         </LinearLayout>
 
-</HorizontalScrollView>
+    </HorizontalScrollView>
 
 
     <ImageView
-    android:id="@+id/trophyUsage"
-    android:layout_width="90dp"
-    android:layout_height="90dp"
-    android:layout_below="@id/scrollView"
-    android:layout_marginTop="60dp"
+        android:id="@+id/trophyUsage"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:layout_below="@id/scrollView"
         android:layout_marginLeft="10dp"
-    android:src="@drawable/trophy" />
+        android:layout_marginTop="60dp"
+        android:src="@drawable/trophy" />
 
     <ImageView
         android:id="@+id/trophyEverything"
         android:layout_width="90dp"
         android:layout_height="90dp"
         android:layout_below="@id/scrollView"
-        android:layout_toRightOf="@id/trophyUsage"
-        android:layout_marginTop="60dp"
         android:layout_marginLeft="20dp"
+        android:layout_marginTop="60dp"
+        android:layout_toRightOf="@id/trophyUsage"
         android:src="@drawable/trophy" />
 
     <ImageView
@@ -233,53 +231,53 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
         android:layout_width="90dp"
         android:layout_height="90dp"
         android:layout_below="@id/scrollView"
-        android:layout_toRightOf="@id/trophyEverything"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="60dp"
+        android:layout_toRightOf="@id/trophyEverything"
         android:src="@drawable/trophy" />
 
     <TextView
+        android:id="@+id/textUsage"
         android:layout_width="90dp"
         android:layout_height="wrap_content"
-        android:id="@+id/textUsage"
         android:layout_below="@id/trophyUsage"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
-        android:text="Usage"
+        android:text="@string/Usage"
         android:textAlignment="center"
-        android:textSize="12sp"/>
+        android:textSize="12sp" />
 
     <TextView
+        android:id="@+id/textEverything"
         android:layout_width="90dp"
         android:layout_height="wrap_content"
-        android:id="@+id/textEverything"
         android:layout_below="@id/trophyEverything"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="10dp"
         android:layout_toEndOf="@id/textUsage"
-        android:text="Everything"
+        android:text="@string/Everything"
         android:textAlignment="center"
-        android:textSize="12sp"/>
+        android:textSize="12sp" />
 
     <TextView
+        android:id="@+id/textSteps"
         android:layout_width="90dp"
         android:layout_height="wrap_content"
-        android:id="@+id/textSteps"
         android:layout_below="@id/trophySteps"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="10dp"
         android:layout_toEndOf="@id/textEverything"
-        android:text="Steps"
+        android:text="@string/Steps"
         android:textAlignment="center"
-        android:textSize="12sp"/>
+        android:textSize="12sp" />
 
     <ImageView
         android:id="@+id/trophyWater"
         android:layout_width="90dp"
         android:layout_height="90dp"
         android:layout_below="@id/trophyUsage"
-        android:layout_marginTop="60dp"
         android:layout_marginLeft="10dp"
+        android:layout_marginTop="60dp"
         android:src="@drawable/trophy" />
 
     <ImageView
@@ -287,9 +285,9 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
         android:layout_width="90dp"
         android:layout_height="90dp"
         android:layout_below="@id/trophyEverything"
-        android:layout_toRightOf="@id/trophyWater"
-        android:layout_marginTop="60dp"
         android:layout_marginLeft="20dp"
+        android:layout_marginTop="60dp"
+        android:layout_toRightOf="@id/trophyWater"
         android:src="@drawable/trophy" />
 
     <ImageView
@@ -297,56 +295,53 @@ tools:context="honoursproject.garethlloyd.healthinformationdelivery.TrophyActivi
         android:layout_width="90dp"
         android:layout_height="90dp"
         android:layout_below="@id/trophySteps"
-        android:layout_toRightOf="@id/trophyActive"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="60dp"
+        android:layout_toRightOf="@id/trophyActive"
         android:src="@drawable/trophy" />
 
     <TextView
+        android:id="@+id/textWater"
         android:layout_width="90dp"
         android:layout_height="wrap_content"
-        android:id="@+id/textWater"
         android:layout_below="@id/trophyWater"
         android:layout_marginLeft="10dp"
         android:layout_marginTop="10dp"
-        android:text="Water"
+        android:text="@string/Water"
         android:textAlignment="center"
-        android:textSize="12sp"/>
+        android:textSize="12sp" />
 
     <TextView
+        android:id="@+id/textActive"
         android:layout_width="90dp"
         android:layout_height="wrap_content"
-        android:id="@+id/textActive"
         android:layout_below="@id/trophyActive"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="10dp"
         android:layout_toEndOf="@id/textUsage"
-        android:text="Active"
+        android:text="@string/Active"
         android:textAlignment="center"
-        android:textSize="12sp"/>
+        android:textSize="12sp" />
 
     <TextView
+        android:id="@+id/textFruit"
         android:layout_width="90dp"
         android:layout_height="wrap_content"
-        android:id="@+id/textFruit"
         android:layout_below="@id/trophyFruit"
         android:layout_marginLeft="20dp"
         android:layout_marginTop="10dp"
         android:layout_toEndOf="@id/textEverything"
-        android:text="Fruit and Veg"
+        android:text="@string/Fruit"
         android:textAlignment="center"
-        android:textSize="12sp"/>
+        android:textSize="12sp" />
 
     <Button
+        android:id="@+id/buttonHome"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Home"
-        android:id="@+id/buttonHome"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
-
-
-
+        android:layout_centerHorizontal="true"
+        android:text="@string/home" />
 
 </RelativeLayout>
 
